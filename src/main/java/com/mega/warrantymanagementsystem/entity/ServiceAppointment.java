@@ -27,10 +27,10 @@ public class ServiceAppointment {
     @JsonIgnore
     private Vehicle vehicle;
 
-    /*@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "campaign_id", nullable = false)
     @JsonIgnore
-    private Campaign campaign;*/
+    private Campaign campaign;
 
     @Column(name = "appointment_date", nullable = false)
     @NotNull(message = "Appointment date cannot be null!")
