@@ -87,10 +87,10 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
             case "AD":
                 roleName = RoleName.ADMIN;
                 break;
-            case "ST":
+            case "SS":
                 roleName = RoleName.SC_STAFF;
                 break;
-            case "SS":
+            case "ST":
                 roleName = RoleName.SC_TECHNICIAN;
                 break;
             case "ES":

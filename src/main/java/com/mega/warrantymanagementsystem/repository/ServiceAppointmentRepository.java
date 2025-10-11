@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface ServiceAppointmentRepository extends JpaRepository<ServiceAppointment, Integer> {
 
-    List<ServiceAppointment> findByVin(String vin);
+    List<ServiceAppointment> findByVehicle_Vin(String vin);
 
     List<ServiceAppointment> findByCampaign_CampaignId(int campaignId);
 }
