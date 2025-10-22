@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
     package com.mega.warrantymanagementsystem.config;
 
     import org.modelmapper.ModelMapper;
@@ -14,6 +15,8 @@
         }
     }
 =======
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 package com.mega.warrantymanagementsystem.config;
 
 import org.modelmapper.ModelMapper;
@@ -28,4 +31,7 @@ public class ModelMapperConfig {
         return new ModelMapper();
     }
 }
+<<<<<<< HEAD
 >>>>>>> origin/main
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c

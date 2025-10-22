@@ -46,11 +46,15 @@ public class Customer {
     @NotEmpty(message = "Address cannot be empty!")
     private String customerAddress;
 
+<<<<<<< HEAD
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 
+=======
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
     @JsonIgnore
     private List<Vehicle> vehicles = new ArrayList<>();
 }

@@ -10,10 +10,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
 
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 @Entity
 @Data
 @Table(name = "service_appointment")
@@ -46,9 +49,12 @@ public class ServiceAppointment {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+<<<<<<< HEAD
 
     // Một lịch hẹn có thể tạo ra nhiều ServiceRecord
     @OneToMany(mappedBy = "serviceAppointment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ServiceRecord> serviceRecords = new ArrayList<>();
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

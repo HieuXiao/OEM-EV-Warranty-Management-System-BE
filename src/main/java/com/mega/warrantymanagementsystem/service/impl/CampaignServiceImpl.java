@@ -3,9 +3,12 @@ package com.mega.warrantymanagementsystem.service.impl;
 import com.mega.warrantymanagementsystem.entity.Campaign;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 <<<<<<< HEAD
+<<<<<<< HEAD
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 =======
 >>>>>>> origin/main
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import com.mega.warrantymanagementsystem.repository.CampaignRepository;
 import com.mega.warrantymanagementsystem.service.CampaignService;
@@ -36,14 +39,18 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public List<Campaign> getAllCampaigns() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> origin/main
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
         return campaignRepository.findAll();
     }
 
     @Override
     public Campaign getCampaignByName(String name) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 
         return campaignRepository.findByCampaignName(name);
@@ -80,4 +87,8 @@ public class CampaignServiceImpl implements CampaignService {
         return campaignRepository.findByCampaignName(name);
     }
 >>>>>>> origin/main
+=======
+        return campaignRepository.findByCampaignName(name);
+    }
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

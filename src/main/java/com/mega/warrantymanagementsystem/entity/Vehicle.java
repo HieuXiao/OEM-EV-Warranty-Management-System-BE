@@ -9,10 +9,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+<<<<<<< HEAD
 
 import java.util.List;
 
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 @Entity// đánh dấu đây là 1 thực thể (entity)
 @Table(name = "vehicles")// tên bảng trong DB
 @Data// tự động sinh getter setter
@@ -28,12 +31,18 @@ public class Vehicle {
     @NotEmpty(message = "vin can not be empty")
     private String vin;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
     @Column(name = "campaign_id", nullable = false)
     @NotNull(message = "Campaign Id cannot be empty!")
     private int campaignId;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
     @Column(name = "year", nullable = false)
     @NotNull(message = "Year cannot be empty!")
     private int year;
@@ -47,6 +56,7 @@ public class Vehicle {
     private String model;
 
     @ManyToOne(fetch = FetchType.LAZY)
+<<<<<<< HEAD
 
     @JoinColumn(name = "campaign_id", referencedColumnName = "campaign_id", nullable = true)
     @JsonIgnore
@@ -54,13 +64,18 @@ public class Vehicle {
 
     @ManyToOne(fetch = FetchType.LAZY)
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     private Customer customer;
 
+<<<<<<< HEAD
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceRecord> serviceRecords;
 
 
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

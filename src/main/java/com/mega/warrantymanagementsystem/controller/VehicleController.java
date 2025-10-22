@@ -29,6 +29,7 @@ public class VehicleController {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @GetMapping("/search/by-model/{model}")
     public ResponseEntity<List<VehicleResponse>> getVehiclesByModel(@PathVariable String model) {
         List<VehicleResponse> vehicles = vehicleService.findByModel(model);
@@ -37,6 +38,9 @@ public class VehicleController {
 =======
 
 >>>>>>> origin/main
+=======
+
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 
     @GetMapping("/{vin}")
     public ResponseEntity<VehicleResponse> getByVin(@PathVariable String vin){
@@ -62,6 +66,7 @@ public class VehicleController {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @PutMapping("/assign-campaign/{campaignId}/model/{model}")
     public ResponseEntity<String> assignCampaignToVehiclesByModel(
             @PathVariable int campaignId,
@@ -78,4 +83,6 @@ public class VehicleController {
 
 =======
 >>>>>>> origin/main
+=======
+>>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }
