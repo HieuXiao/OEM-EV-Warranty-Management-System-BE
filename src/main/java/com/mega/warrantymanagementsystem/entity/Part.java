@@ -1,11 +1,6 @@
 package com.mega.warrantymanagementsystem.entity;
 
-<<<<<<< HEAD
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -13,13 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-<<<<<<< HEAD
-
 import java.util.ArrayList;
 import java.util.List;
 
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 @Entity
 @Data
 @Table(name = "part")
@@ -50,18 +41,10 @@ public class Part {
     //------------------Liên kết inventory------------------------
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventory_id", nullable = false)
-<<<<<<< HEAD
-
     @JsonIgnore
     private Inventory inventoryId;
 
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ClaimReplacementPart> claimReplacementParts = new ArrayList<>();
-
-    private Inventory inventoryId;
-
-=======
-    private Inventory inventoryId;
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

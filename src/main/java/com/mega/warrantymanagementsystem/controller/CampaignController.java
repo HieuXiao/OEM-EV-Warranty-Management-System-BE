@@ -39,7 +39,6 @@ public class CampaignController {
         }
         return ResponseEntity.ok(campaign);
     }
-<<<<<<< HEAD
 
     @GetMapping("/{id}")
     public ResponseEntity<Campaign> getCampaignById(@PathVariable int id) {
@@ -60,6 +59,5 @@ public class CampaignController {
         campaignService.deleteCampaign(id);
         return ResponseEntity.ok("Deleted campaign with id: " + id);
     }
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
+
 }

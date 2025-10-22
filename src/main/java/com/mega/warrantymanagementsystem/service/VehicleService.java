@@ -16,15 +16,10 @@ public interface VehicleService {
 
     List<VehicleResponse> getAllVehicles();
 
-
-<<<<<<< HEAD
     List<VehicleResponse> findByModel(String model);
 
     void assignCampaignToVehiclesByModel(int campaignId, String model);
 
     void removeCampaignFromModel(String model);
 
-
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

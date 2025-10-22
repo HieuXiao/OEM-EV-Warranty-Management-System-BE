@@ -28,19 +28,11 @@ public class VehicleController {
         return ResponseEntity.ok(created);
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     @GetMapping("/search/by-model/{model}")
     public ResponseEntity<List<VehicleResponse>> getVehiclesByModel(@PathVariable String model) {
         List<VehicleResponse> vehicles = vehicleService.findByModel(model);
         return ResponseEntity.ok(vehicles);
     }
-=======
-
->>>>>>> origin/main
-=======
-
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 
     @GetMapping("/{vin}")
     public ResponseEntity<VehicleResponse> getByVin(@PathVariable String vin){
@@ -65,8 +57,6 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     @PutMapping("/assign-campaign/{campaignId}/model/{model}")
     public ResponseEntity<String> assignCampaignToVehiclesByModel(
             @PathVariable int campaignId,
@@ -81,8 +71,4 @@ public class VehicleController {
         return ResponseEntity.ok("Removed campaign from all vehicles of model: " + model);
     }
 
-=======
->>>>>>> origin/main
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }

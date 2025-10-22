@@ -11,15 +11,10 @@ public interface CampaignService {
     Campaign createCampaign(CampaignRequest request);
     List<Campaign> getAllCampaigns();
     Campaign getCampaignByName(String name);
-<<<<<<< HEAD
-
 
     Campaign getCampaignById(int id);
 
     Campaign updateCampaign(int id, CampaignRequest request);
 
     void deleteCampaign(int id);
-
-=======
->>>>>>> dd2688e4548ab8a0460d7d748184888d4f160c8c
 }
