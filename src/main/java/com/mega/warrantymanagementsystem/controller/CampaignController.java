@@ -59,5 +59,4 @@ public class CampaignController {
         campaignService.deleteCampaign(id);
         return ResponseEntity.ok("Deleted campaign with id: " + id);
     }
-
 }

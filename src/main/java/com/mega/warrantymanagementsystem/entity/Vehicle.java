@@ -9,7 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.util.List;
+
 
 @Entity// đánh dấu đây là 1 thực thể (entity)
 @Table(name = "vehicles")// tên bảng trong DB
@@ -26,6 +28,12 @@ public class Vehicle {
     @NotEmpty(message = "vin can not be empty")
     private String vin;
 
+
+    @Column(name = "campaign_id", nullable = false)
+    @NotNull(message = "Campaign Id cannot be empty!")
+    private int campaignId;
+
+
     @Column(name = "year", nullable = false)
     @NotNull(message = "Year cannot be empty!")
     private int year;
@@ -39,14 +47,17 @@ public class Vehicle {
     private String model;
 
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "campaign_id", referencedColumnName = "campaign_id", nullable = true)
     @JsonIgnore
     private Campaign campaign;
 
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     private Customer customer;
+
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceRecord> serviceRecords;

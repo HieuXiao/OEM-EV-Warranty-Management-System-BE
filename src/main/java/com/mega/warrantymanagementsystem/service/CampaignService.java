@@ -12,9 +12,11 @@ public interface CampaignService {
     List<Campaign> getAllCampaigns();
     Campaign getCampaignByName(String name);
 
+
     Campaign getCampaignById(int id);
 
     Campaign updateCampaign(int id, CampaignRequest request);
 
     void deleteCampaign(int id);
+
 }

@@ -1,13 +1,19 @@
 package com.mega.warrantymanagementsystem.entity;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonIgnore;
+=======
+>>>>>>> origin/main
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
+=======
+>>>>>>> origin/main
 
 @Entity
 @Table(name = "campaign")
@@ -32,6 +38,7 @@ public class Campaign {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+<<<<<<< HEAD
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -42,4 +49,6 @@ public class Campaign {
     @JsonIgnore
     private List<ServiceRecord> serviceRecords = new ArrayList<>();
 
+=======
+>>>>>>> origin/main
 }

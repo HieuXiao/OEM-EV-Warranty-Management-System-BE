@@ -1,12 +1,15 @@
 package com.mega.warrantymanagementsystem.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +44,14 @@ public class Part {
     //------------------Liên kết inventory------------------------
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventory_id", nullable = false)
+
     @JsonIgnore
     private Inventory inventoryId;
 
     @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ClaimReplacementPart> claimReplacementParts = new ArrayList<>();
+
+    private Inventory inventoryId;
+
 }
