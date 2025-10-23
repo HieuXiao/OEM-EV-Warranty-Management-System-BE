@@ -3,19 +3,24 @@ package com.mega.warrantymanagementsystem.service.impl;
 
 import com.mega.warrantymanagementsystem.entity.Account;
 import com.mega.warrantymanagementsystem.entity.Role;
+import com.mega.warrantymanagementsystem.entity.ServiceCenter;
 import com.mega.warrantymanagementsystem.entity.entity.RoleName;
+import org.springframework.security.authentication.BadCredentialsException;
+import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.AccoutRequest;
 import com.mega.warrantymanagementsystem.model.request.LoginRequest;
 import com.mega.warrantymanagementsystem.model.request.UpdateRequest;
 import com.mega.warrantymanagementsystem.model.response.AccountResponse;
+import com.mega.warrantymanagementsystem.model.response.ServiceCenterResponse;
 import com.mega.warrantymanagementsystem.repository.AccountRepository;
 import com.mega.warrantymanagementsystem.repository.RoleRepository;
+import com.mega.warrantymanagementsystem.repository.ServiceCenterRepository;
 import com.mega.warrantymanagementsystem.service.AccountService;
 import com.mega.warrantymanagementsystem.service.TokenService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountServiceImpl implements AccountService, UserDetailsService {
@@ -39,6 +45,9 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     RoleRepository roleRepository;
 
     @Autowired
+    private ServiceCenterRepository serviceCenterRepository;
+
+    @Autowired
     ModelMapper modelMapper;
 
     @Autowired
@@ -48,163 +57,178 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     TokenService tokenService;
 
     @Override
-    public Account findByUsername(String username) {
-
-        return accountRepository.findByUsername(username);
+    public AccountResponse findByUsername(String username) {
+        Account account = accountRepository.findByUsername(username);
+        if (account == null) throw new ResourceNotFoundException("Account not found: " + username);
+        return mapToResponse(account);
     }
 
     @Override
-    public Account findByEmail(String email) {
-
-        return accountRepository.findByEmail(email);
+    public AccountResponse findByEmail(String email) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) throw new ResourceNotFoundException("Account not found with email: " + email);
+        return mapToResponse(account);
     }
 
     @Override
-    public Account findByAccountId(String accountId) {
-
-        return accountRepository.findByAccountId(accountId);
+    public AccountResponse findByAccountId(String accountId) {
+        Account account = accountRepository.findByAccountId(accountId.toUpperCase());
+        if (account == null) throw new ResourceNotFoundException("Account not found with ID: " + accountId);
+        return mapToResponse(account);
     }
 
     @Override
-    public Account createAccount(AccoutRequest accoutRequest) {
-        // Xử lý logic cho createAccount
+    public AccountResponse createAccount(AccoutRequest accoutRequest) {
         Account account = modelMapper.map(accoutRequest, Account.class);
-        //mã hóa password
-
-        // uppercase accountId
         account.setAccountId(account.getAccountId().toUpperCase());
-
         account.setPassword(passwordEncoder.encode(account.getPassword()));
 
-        // Lấy prefix (AD, SS, ST, ES)
+        // xác định role theo prefix ID
         String prefix = account.getAccountId().substring(0, 2);
+        RoleName roleName = switch (prefix) {
+            case "AD" -> RoleName.ADMIN;
+            case "SS" -> RoleName.SC_STAFF;
+            case "ST" -> RoleName.SC_TECHNICIAN;
+            case "ES" -> RoleName.EVM_STAFF;
+            default -> throw new IllegalArgumentException("Invalid account prefix: " + prefix);
+        };
 
-        if (prefix == null) {
-            throw new IllegalArgumentException("Role not found in database: " + prefix);
-        }
-        RoleName roleName;
-        switch (prefix) {
-            case "AD":
-                roleName = RoleName.ADMIN;
-                break;
-            case "SS":
-                roleName = RoleName.SC_STAFF;
-                break;
-            case "ST":
-                roleName = RoleName.SC_TECHNICIAN;
-                break;
-            case "ES":
-                roleName = RoleName.EVM_STAFF;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid account prefix: " + prefix);
-        }
-
-        // Lấy Role từ DB dựa trên roleName
-        // Dùng Optional để tránh lỗi null
-        Optional<Role> optionalRole = roleRepository.findById(roleName);
-        Role role;
-        if (optionalRole.isPresent()) {
-            role = optionalRole.get();
-        } else {
-            throw new IllegalArgumentException("Role not found in DB: " + roleName);
-        }
-
+        Role role = roleRepository.findById(roleName)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found in DB: " + roleName));
         account.setRole(role);
 
-        return accountRepository.save(account);
+        Account saved = accountRepository.save(account);
+        return mapToResponse(saved);
     }
 
-//    @Override
-//    public Account updateAccount(UpdateRequest UpdateRequest) {
-//        Account account = modelMapper.map(UpdateRequest, Account.class);
-//        Account existingAccount = accountRepository.findById(account.getAccountId()).orElse(null);
-//        if (existingAccount != null) {
-//            existingAccount.setUsername(account.getUsername());
-//            existingAccount.setEmail(account.getEmail());
-//            existingAccount.setGender(account.getGender());
-//            existingAccount.setFullName(account.getFullName());
-//            existingAccount.setPhone(account.getPhone());
-//            return accountRepository.save(existingAccount);
-//        }
-//        return existingAccount;
-//    }
-
     @Override
-    public Account updateAccount(String accountId, UpdateRequest updateRequest) {
-        Account existingAccount = accountRepository.findById(accountId).orElse(null);
+    public AccountResponse updateAccount(String accountId, UpdateRequest updateRequest) {
+        Account account = accountRepository.findById(accountId.toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
 
-        if (existingAccount != null) {
-            // Cập nhật thông tin
-            existingAccount.setUsername(updateRequest.getUsername());
-
-            if (updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()) {
-                existingAccount.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
-            }
-
-            existingAccount.setFullName(updateRequest.getFullName());
-            existingAccount.setGender(updateRequest.getGender());
-            existingAccount.setEmail(updateRequest.getEmail());
-            existingAccount.setPhone(updateRequest.getPhone());
-
-            return accountRepository.save(existingAccount);
-        } else {
-            throw new IllegalArgumentException("Account not found with id: " + accountId);
+        account.setUsername(updateRequest.getUsername());
+        if (updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()) {
+            account.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
         }
+        account.setFullName(updateRequest.getFullName());
+        account.setGender(updateRequest.getGender());
+        account.setEmail(updateRequest.getEmail());
+        account.setPhone(updateRequest.getPhone());
+
+        return mapToResponse(accountRepository.save(account));
     }
 
 
     @Override
     public void deleteAccount(String accountId) {
-
-        accountRepository.deleteById(accountId);
+        accountRepository.deleteById(accountId.toUpperCase());
     }
 
     @Override
     public AccountResponse login(LoginRequest loginRequest) {
-        //xử lý logic
-        //xác thực tài khoản
-        String inputAccountId = loginRequest.getAccountId().toUpperCase();
-        Account account = accountRepository.findByAccountId(inputAccountId);
-        if (account == null) {
+        String inputId = loginRequest.getAccountId().toUpperCase();
+        Account account = accountRepository.findByAccountId(inputId);
+        if (account == null || !passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())) {
             throw new BadCredentialsException("Invalid accountId or password");
         }
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())) {
-            throw new BadCredentialsException("Invalid accountId or password");
+        if (!account.isEnabled()) {
+            throw new BadCredentialsException("This account has been disabled. Please contact the administrator.");
         }
 
-        String token = tokenService.generateToken(account);//tạo token
-
-        AccountResponse accountResponse = modelMapper.map(account, AccountResponse.class);//map
-        accountResponse.setToken(token);//gán token vào response
-
-        Role role = account.getRole();
-        if (role != null) {
-            // roleName là enum, lấy name() của enum
-            accountResponse.setRoleName(role.getRoleName().name());
-        }
-
-        return accountResponse;
+        String token = tokenService.generateToken(account);
+        AccountResponse response = mapToResponse(account);
+        response.setToken(token);
+        return response;
     }
 
     @Override
-    public Account getCurrentAccount() {
-
-        return (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public AccountResponse getCurrentAccount() {
+        Account current = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return mapToResponse(current);
     }
 
     @Override
-
-    public List<Account> getAccounts() {
-        List<Account> accounts = accountRepository.findAll();
-        return accounts;
+    public List<AccountResponse> getAccounts() {
+        return accountRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return accountRepository.findByUsername(username);
     }
+
+    @Transactional
+    @Override
+    public void addServiceCenterToAccount(String accountId, int centerId) {
+        Account account = accountRepository.findById(accountId.toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        ServiceCenter serviceCenter = serviceCenterRepository.findById(centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Service Center not found: " + centerId));
+
+        account.setServiceCenter(serviceCenter);
+        accountRepository.save(account);
+    }
+
+
+    @Transactional
+    @Override
+    public void removeServiceCenterFromAccount(String accountId) {
+        Account account = accountRepository.findById(accountId.toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        account.setServiceCenter(null);
+        accountRepository.save(account);
+    }
+
+    @Override
+    public List<AccountResponse> getAccountsByServiceCenter(int centerId) {
+        return accountRepository.findByServiceCenter_CenterId(centerId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AccountResponse updateAccountStatus(String accountId, boolean enabled) {
+        Account account = accountRepository.findById(accountId.toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        account.setEnabled(enabled);
+        return mapToResponse(accountRepository.save(account));
+    }
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse res = new AccountResponse();
+        res.setAccountId(account.getAccountId());
+        res.setUsername(account.getUsername());
+        res.setFullName(account.getFullName());
+        res.setGender(account.getGender());
+        res.setEmail(account.getEmail());
+        res.setPhone(account.getPhone());
+
+        // --- MỚI: set enabled
+        res.setEnabled(account.isEnabled());
+
+        if (account.getRole() != null) {
+            res.setRoleName(account.getRole().getRoleName().name());
+        }
+
+        if (account.getServiceCenter() != null) {
+            ServiceCenter sc = account.getServiceCenter();
+            res.setServiceCenter(new ServiceCenterResponse(
+                    sc.getCenterId(),
+                    sc.getCenterName(),
+                    sc.getLocation()
+            ));
+        }
+
+        return res;
+    }
+
+
 
 
     //cơ chế

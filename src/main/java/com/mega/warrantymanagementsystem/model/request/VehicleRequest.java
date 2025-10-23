@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VehicleRequest {
     private String vin;
-    private int year;
+    private String plate;
+    private String type;
     private String color;
     private String model;
     private String customerPhone;

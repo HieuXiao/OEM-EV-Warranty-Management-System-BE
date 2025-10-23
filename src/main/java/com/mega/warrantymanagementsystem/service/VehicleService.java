@@ -22,4 +22,9 @@ public interface VehicleService {
 
     void removeCampaignFromModel(String model);
 
+    void assignCampaignToVehicleByVin(int campaignId, String vin);
+
+    void removeCampaignFromVehicleByVin(String vin);
+
+
 }

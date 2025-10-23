@@ -11,16 +11,22 @@ import java.util.List;
 
 @Service
 public interface AccountService {
-    Account findByUsername(String username);
-    Account findByEmail(String email);
-    Account findByAccountId(String accountId);
+    AccountResponse  findByUsername(String username);
+    AccountResponse  findByEmail(String email);
+    AccountResponse  findByAccountId(String accountId);
 
-    Account createAccount(AccoutRequest accountRequest);
-    Account updateAccount(String id,UpdateRequest updateRequest);
+    AccountResponse  createAccount(AccoutRequest accountRequest);
+    AccountResponse  updateAccount(String id,UpdateRequest updateRequest);
+    AccountResponse updateAccountStatus(String accountId, boolean enabled);
     void deleteAccount(String accountId);
 
     AccountResponse login(LoginRequest loginRequest);
-    Account getCurrentAccount();
+    AccountResponse  getCurrentAccount();
 
-    public List<Account> getAccounts();
+    List<AccountResponse > getAccounts();
+
+    void addServiceCenterToAccount(String accountId, int centerId);
+    void removeServiceCenterFromAccount(String accountId);
+
+    List<AccountResponse > getAccountsByServiceCenter(int centerId);
 }

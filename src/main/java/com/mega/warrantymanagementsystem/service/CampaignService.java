@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Campaign;
+import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import org.springframework.stereotype.Service;
 
@@ -17,4 +18,5 @@ public interface CampaignService {
     Campaign updateCampaign(int id, CampaignRequest request);
 
     void deleteCampaign(int id);
+
 }

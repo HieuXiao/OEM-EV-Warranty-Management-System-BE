@@ -24,15 +24,11 @@ public class WarrantyClaimRequest {
     @NotNull(message = "Technician ID cannot be null")
     private String scTechnicianId; // Account (technician)
 
-    @NotNull(message = "EVM ID cannot be null")
-    private String evmId; // Account (EVM)
-
     @NotNull(message = "Policy ID cannot be null")
     private int policyId; // liên kết Policy
 
-    @NotNull(message = "Status cannot be null")
-    private WarrantyClaimStatus status;
-
     private String description; // mô tả chi tiết
+
+    private String evmDescription;
 
 }

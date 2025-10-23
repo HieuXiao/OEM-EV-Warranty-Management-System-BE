@@ -31,11 +31,8 @@ public class WarrantyClaimController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<WarrantyClaimResponse> updateWarrantyClaim(
-            @PathVariable("id") int claimId,
-            @Valid @RequestBody WarrantyClaimRequest request) {
-        WarrantyClaimResponse response = warrantyClaimService.updateWarrantyClaim(claimId, request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<WarrantyClaimResponse> update(@PathVariable int id, @RequestBody WarrantyClaimRequest request) {
+        return ResponseEntity.ok(warrantyClaimService.updateWarrantyClaim(id, request));
     }
 
     @GetMapping("/{id}")
@@ -49,25 +46,10 @@ public class WarrantyClaimController {
         return ResponseEntity.ok(warrantyClaimService.findAll());
     }
 
-    @GetMapping("/staff/{staffId}")
-    public ResponseEntity<List<WarrantyClaimResponse>> getByStaff(@PathVariable("staffId") String staffId) {
-        return ResponseEntity.ok(warrantyClaimService.findByStaffId(staffId));
-    }
-
-    @GetMapping("/technician/{techId}")
-    public ResponseEntity<List<WarrantyClaimResponse>> getByTechnician(@PathVariable("techId") String techId) {
-        return ResponseEntity.ok(warrantyClaimService.findByTechnicianId(techId));
-    }
-
-    @GetMapping("/evm/{evmId}")
-    public ResponseEntity<List<WarrantyClaimResponse>> getByEvm(@PathVariable("evmId") String evmId) {
-        return ResponseEntity.ok(warrantyClaimService.findByEvmId(evmId));
-    }
-
-    @GetMapping("/policy/{policyId}")
-    public ResponseEntity<List<WarrantyClaimResponse>> getByPolicy(@PathVariable("policyId") int policyId) {
-        return ResponseEntity.ok(warrantyClaimService.findByPolicyId(policyId));
-    }
+//    @GetMapping("/policy/{policyId}")
+//    public ResponseEntity<List<WarrantyClaimResponse>> getByPolicy(@PathVariable("policyId") int policyId) {
+//        return ResponseEntity.ok(warrantyClaimService.findByPolicyId(policyId));
+//    }
 
     @GetMapping("/date/{date}")
     public ResponseEntity<List<WarrantyClaimResponse>> getByDate(@PathVariable("date") LocalDate date) {
@@ -90,71 +72,13 @@ public class WarrantyClaimController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{claimId}/status")
-    public ResponseEntity<WarrantyClaimResponse> updateStatus(
+    // Cập nhật mô tả từ EVM
+    @PutMapping("/{claimId}/evm/description")
+    public ResponseEntity<Void> updateEvmDescription(
             @PathVariable int claimId,
-            @RequestParam WarrantyClaimStatus status) {
-
-        WarrantyClaimResponse response = warrantyClaimService.updateStatus(claimId, status);
-        return ResponseEntity.ok(response);
-    }
-
-    // ---------------- ADD ATTACHMENT ----------------
-    @PostMapping("/{claimId}/attachments/{attachmentId}")
-    public ResponseEntity<Void> addAttachmentToClaim(
-            @PathVariable int claimId,
-            @PathVariable int attachmentId) {
-        warrantyClaimService.addAttachmentToClaim(claimId, attachmentId);
+            @RequestParam("description") String description) {
+        warrantyClaimService.updateEvmDescription(claimId, description);
         return ResponseEntity.ok().build();
-    }
-
-    // ---------------- DELETE ATTACHMENT ----------------
-    @DeleteMapping("/{claimId}/attachments/{attachmentId}")
-    public ResponseEntity<Void> removeAttachmentFromClaim(
-            @PathVariable int claimId,
-            @PathVariable int attachmentId) {
-        warrantyClaimService.removeAttachmentFromClaim(claimId, attachmentId);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    // ---------------- ADD REPLACEMENT PART ----------------
-    @PostMapping("/{claimId}/replacement-parts/{partUserId}")
-    public ResponseEntity<Void> addReplacementPartToClaim(
-            @PathVariable int claimId,
-            @PathVariable int partUserId) {
-
-        warrantyClaimService.addReplacementPartToClaim(claimId, partUserId);
-        return ResponseEntity.ok().build();
-    }
-
-    // ---------------- REMOVE REPLACEMENT PART ----------------
-    @DeleteMapping("/{claimId}/replacement-parts/{partUserId}")
-    public ResponseEntity<Void> removeReplacementPartFromClaim(
-            @PathVariable int claimId,
-            @PathVariable int partUserId) {
-
-        warrantyClaimService.removeReplacementPartFromClaim(claimId, partUserId);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    // Gắn record vào claim
-    @PostMapping("/{claimId}/service_records/{recordId}")
-    public ResponseEntity<Void> addServiceRecordToClaim(
-            @PathVariable int claimId,
-            @PathVariable int recordId) {
-        warrantyClaimService.addServiceRecordToClaim(claimId, recordId);
-        return ResponseEntity.ok().build();
-    }
-
-    // Tách record khỏi claim
-    @DeleteMapping("/{claimId}/service_records/{recordId}")
-    public ResponseEntity<Void> removeServiceRecordFromClaim(
-            @PathVariable int claimId,
-            @PathVariable int recordId) {
-        warrantyClaimService.removeServiceRecordFromClaim(claimId, recordId);
-        return ResponseEntity.noContent().build();
     }
 
 }

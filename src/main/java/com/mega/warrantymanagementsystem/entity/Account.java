@@ -67,13 +67,22 @@ public class Account implements UserDetails {
     @JoinColumn(name = "role_name", nullable = false)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "center_id") // Khóa ngoại trỏ đến bảng service_center
+    private ServiceCenter serviceCenter;
+
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
+
     @Override
     public String getUsername() {
+
         return username;
     }
 
     @Override
     public String getPassword() {
+
         return password;
     }
 
@@ -91,21 +100,25 @@ public class Account implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
+
         return true;
     }//tài khoản không hết hạn
 
     @Override
     public boolean isAccountNonLocked() {
+
         return true;
     }//tài khoản không bị khóa
 
     @Override
     public boolean isCredentialsNonExpired() {
+
         return true;
     }//mật khẩu không hết hạn
 
     @Override
     public boolean isEnabled() {
-        return true;
+
+        return enabled;
     }//tài khoản được kích hoạt
 }

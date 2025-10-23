@@ -17,16 +17,12 @@ public interface WarrantyClaimService {
     WarrantyClaimResponse updateWarrantyClaim(int claimId, WarrantyClaimRequest request);
     WarrantyClaimResponse findById(int claimId);
     List<WarrantyClaimResponse> findAll();
-    List<WarrantyClaimResponse> findByStaffId(String staffId);
-    List<WarrantyClaimResponse> findByTechnicianId(String technicianId);
-    List<WarrantyClaimResponse> findByEvmId(String evmId);
-    List<WarrantyClaimResponse> findByPolicyId(int policyId);
+//    List<WarrantyClaimResponse> findByPolicyId(int policyId);
     List<WarrantyClaimResponse> findByClaimDate(LocalDate claimDate);
     List<WarrantyClaimResponse> findByStatus(WarrantyClaimStatus status);
     List<WarrantyClaimResponse> findByVehicleVin(String vin);
-
+    void updateEvmDescription(int claimId, String description);
     void deleteWarrantyClaim(int claimId);
-    WarrantyClaimResponse updateStatus(int claimId, WarrantyClaimStatus newStatus);
 
     // ---- Attachment ----
     void addAttachmentToClaim(int claimId, int attachmentId);
@@ -39,4 +35,14 @@ public interface WarrantyClaimService {
     // ---- Service Record ----
     void addServiceRecordToClaim(int claimId, int serviceRecordId);
     void removeServiceRecordFromClaim(int claimId, int serviceRecordId);
+
+    // ---- Campaign ----
+    void addCampaignToClaim(int claimId, int campaignId);
+    void removeCampaignFromClaim(int claimId, int campaignId);
+
+    // ----- Bo sung -----
+    void assignEvmToClaim(int claimId, String evmId);
+    void technicianToggleDone(int claimId, boolean done);
+    void scStaffToggleDone(int claimId, boolean done);
+
 }

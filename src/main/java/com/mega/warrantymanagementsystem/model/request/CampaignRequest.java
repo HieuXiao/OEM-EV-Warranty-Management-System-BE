@@ -14,4 +14,7 @@ public class CampaignRequest {
     private String serviceDescription;
     private LocalDate startDate;
     private LocalDate endDate;
+
+    // Thêm model cho request
+    private String model;
 }

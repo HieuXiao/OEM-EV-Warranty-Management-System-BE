@@ -71,4 +71,19 @@ public class VehicleController {
         return ResponseEntity.ok("Removed campaign from all vehicles of model: " + model);
     }
 
+    @PutMapping("/assign-campaign/{campaignId}/vin/{vin}")
+    public ResponseEntity<String> assignCampaignToVehicleByVin(
+            @PathVariable int campaignId,
+            @PathVariable String vin) {
+        vehicleService.assignCampaignToVehicleByVin(campaignId, vin);
+        return ResponseEntity.ok("Campaign " + campaignId + " assigned to vehicle VIN: " + vin);
+    }
+
+    @PutMapping("/remove-campaign/vin/{vin}")
+    public ResponseEntity<String> removeCampaignFromVehicleByVin(@PathVariable String vin) {
+        vehicleService.removeCampaignFromVehicleByVin(vin);
+        return ResponseEntity.ok("Removed campaign from vehicle VIN: " + vin);
+    }
+
+
 }

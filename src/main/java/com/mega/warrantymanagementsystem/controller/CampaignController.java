@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.controller;
 
 import com.mega.warrantymanagementsystem.entity.Campaign;
+import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import com.mega.warrantymanagementsystem.service.CampaignService;
@@ -59,5 +60,6 @@ public class CampaignController {
         campaignService.deleteCampaign(id);
         return ResponseEntity.ok("Deleted campaign with id: " + id);
     }
+
 
 }

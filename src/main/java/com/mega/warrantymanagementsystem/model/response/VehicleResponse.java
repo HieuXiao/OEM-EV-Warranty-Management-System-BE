@@ -11,9 +11,11 @@ public class VehicleResponse {
 
     private String vin;
     private int campaignId;
-    private int year;
+    private String plate;
+    private String type;
     private String color;
     private String model;
+
 
     private CustomerResponse customer;
 }

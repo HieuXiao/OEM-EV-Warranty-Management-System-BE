@@ -15,4 +15,7 @@ public class CampaignResponse {
     private String serviceDescription;
     private LocalDate startDate;
     private LocalDate endDate;
+
+    // Trả thêm model để client biết chiến dịch áp dụng cho dòng xe nào
+    private String model;
 }

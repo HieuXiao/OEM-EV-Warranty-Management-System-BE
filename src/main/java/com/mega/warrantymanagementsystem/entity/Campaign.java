@@ -33,6 +33,10 @@ public class Campaign {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    // ====== Thêm trường model để xác định chiến dịch áp dụng cho dòng xe nào ======
+    @Column(name = "model", nullable = false, length = 50)
+    private String model;
+
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Vehicle> vehicles = new ArrayList<>();
@@ -41,5 +45,11 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ServiceRecord> serviceRecords = new ArrayList<>();
+
+    // -----------------Map ngược lại Warranty Claim ------------------
+    @ManyToMany(mappedBy = "campaigns")
+    @JsonIgnore
+    private List<WarrantyClaim> warrantyClaims = new ArrayList<>();
+
 
 }

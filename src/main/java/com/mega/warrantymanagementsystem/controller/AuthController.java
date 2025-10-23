@@ -27,24 +27,32 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // ======================= REGISTER =======================
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@RequestBody AccoutRequest accoutRequest) {
-        // kiểm tra trùng accountId
-        if (accountService.findByAccountId(accoutRequest.getAccountId()) != null) {
+    public ResponseEntity<AccountResponse> register(@RequestBody AccoutRequest accoutRequest) {
+        // Kiểm tra trùng accountId
+        try {
+            accountService.findByAccountId(accoutRequest.getAccountId());
             throw new DuplicateResourceException("Account ID " + accoutRequest.getAccountId() + " already exists");
-        }
-        // kiểm tra trùng username
-        if (accountService.findByUsername(accoutRequest.getUsername()) != null) {
+        } catch (Exception ignored) { } // nếu ném ResourceNotFound thì pass
+
+        // Kiểm tra trùng username
+        try {
+            accountService.findByUsername(accoutRequest.getUsername());
             throw new DuplicateResourceException("Username " + accoutRequest.getUsername() + " already exists");
-        }
-        // kiểm tra trùng email
-        if (accountService.findByEmail(accoutRequest.getEmail()) != null) {
+        } catch (Exception ignored) { }
+
+        // Kiểm tra trùng email
+        try {
+            accountService.findByEmail(accoutRequest.getEmail());
             throw new DuplicateResourceException("Email " + accoutRequest.getEmail() + " already exists");
-        }
-        Account createdAccount = accountService.createAccount(accoutRequest);
+        } catch (Exception ignored) { }
+
+        AccountResponse createdAccount = accountService.createAccount(accoutRequest);
         return ResponseEntity.ok(createdAccount);
     }
 
+    // ======================= LOGIN =======================
     @PostMapping("/login")
     public ResponseEntity<AccountResponse> login(@RequestBody LoginRequest loginRequest) {
         AccountResponse account = accountService.login(loginRequest);

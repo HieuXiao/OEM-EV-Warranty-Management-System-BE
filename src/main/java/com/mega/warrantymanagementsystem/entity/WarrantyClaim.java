@@ -60,19 +60,40 @@ public class WarrantyClaim {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "evm_description", columnDefinition = "TEXT")
+    private String evmDescription;
+
+    // ----------------- Update status -----------
+    @Column(name = "technician_done", nullable = false)
+    private boolean technicianDone = false;
+
+    @Column(name = "sc_staff_done", nullable = false)
+    private boolean scStaffDone = false;
+
     // ------------------ Quan hệ với ClaimReplacementPart ------------------
-    @OneToMany(mappedBy = "warrantyClaim", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ClaimReplacementPart> claimReplacementParts = new ArrayList<>();
 
     // ------------------ Quan hệ với ClaimAttachment ------------------
-    @OneToMany(mappedBy = "warrantyClaim", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ClaimAttachment> claimAttachments = new ArrayList<>();
 
     // ------------------ Quan hệ với ServiceRecord ------------------
-    @OneToMany(mappedBy = "warrantyClaim", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ServiceRecord> serviceRecords = new ArrayList<>();
+
+    // ------------------- Quan hệ với Campaign -----------------------
+    @ManyToMany
+    @JoinTable(
+            name = "claim_campaign",
+            joinColumns = @JoinColumn(name = "claim_id"),
+            inverseJoinColumns = @JoinColumn(name = "campaign_id")
+    )
+    @JsonIgnore
+    private List<Campaign> campaigns = new ArrayList<>();
+
 
 }

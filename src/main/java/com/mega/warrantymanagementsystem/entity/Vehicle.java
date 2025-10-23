@@ -26,9 +26,13 @@ public class Vehicle {
     @NotEmpty(message = "vin can not be empty")
     private String vin;
 
-    @Column(name = "year", nullable = false)
-    @NotNull(message = "Year cannot be empty!")
-    private int year;
+    @Column(name = "plate", nullable = false, length = 15, unique = true)
+    @NotEmpty(message = "License plate cannot be empty")
+    private String plate;
+
+    @Column(name = "type", nullable = false, length = 30)
+    @NotEmpty(message = "Vehicle type cannot be empty")
+    private String type;
 
     @Column(name = "color", nullable = false, length = 30)
     @NotEmpty(message = "Color cannot be empty!")

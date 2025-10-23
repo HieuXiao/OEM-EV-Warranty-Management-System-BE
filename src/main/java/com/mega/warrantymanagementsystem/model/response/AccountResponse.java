@@ -17,4 +17,9 @@ public class AccountResponse {
     String token;
 
     String roleName;
+
+    private boolean enabled;
+
+    // Gói lại thông tin Service Center
+    private ServiceCenterResponse serviceCenter;
 }

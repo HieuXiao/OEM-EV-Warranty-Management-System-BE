@@ -3,7 +3,7 @@ package com.mega.warrantymanagementsystem.service.impl;
 import com.mega.warrantymanagementsystem.entity.Campaign;
 import com.mega.warrantymanagementsystem.entity.Customer;
 import com.mega.warrantymanagementsystem.entity.Vehicle;
-import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
+import com.mega.warrantymanagementsystem.exception.exception.InvalidOperationException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.VehicleRequest;
 import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class VehicleServiceImpl implements VehicleService {
@@ -25,7 +24,6 @@ public class VehicleServiceImpl implements VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    //model mapper để chuyển đổi giữa entity và DTO
     @Autowired
     private ModelMapper modelMapper;
 
@@ -67,11 +65,11 @@ public class VehicleServiceImpl implements VehicleService {
 
         Vehicle vehicle = new Vehicle();
         vehicle.setVin(vehicleRequest.getVin());
-        vehicle.setYear(vehicleRequest.getYear());
+        vehicle.setPlate(vehicleRequest.getPlate());
+        vehicle.setType(vehicleRequest.getType());
         vehicle.setColor(vehicleRequest.getColor());
         vehicle.setModel(vehicleRequest.getModel());
         vehicle.setCustomer(customer);
-        // Không set campaign ở đây nữa
 
         Vehicle saved = vehicleRepository.save(vehicle);
         return modelMapper.map(saved, VehicleResponse.class);
@@ -90,15 +88,13 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<VehicleResponse> findByModel(String model) {
         List<Vehicle> vehicles = vehicleRepository.findByModel(model);
-
         if (vehicles == null || vehicles.isEmpty()) {
-            return new ArrayList<VehicleResponse>();
+            return new ArrayList<>();
         }
 
-        List<VehicleResponse> responses = new ArrayList<VehicleResponse>();
-        for (Vehicle vehicle : vehicles) {
-            VehicleResponse vr = modelMapper.map(vehicle, VehicleResponse.class);
-            responses.add(vr);
+        List<VehicleResponse> responses = new ArrayList<>();
+        for (Vehicle v : vehicles) {
+            responses.add(modelMapper.map(v, VehicleResponse.class));
         }
         return responses;
     }
@@ -113,13 +109,10 @@ public class VehicleServiceImpl implements VehicleService {
             throw new ResourceNotFoundException("No vehicles found for model: " + model);
         }
 
-        List<Vehicle> toSave = new ArrayList<Vehicle>();
-        for (Vehicle vehicle : vehicles) {
-            vehicle.setCampaign(campaign);
-            toSave.add(vehicle);
+        for (Vehicle v : vehicles) {
+            v.setCampaign(campaign);
         }
-
-        vehicleRepository.saveAll(toSave);
+        vehicleRepository.saveAll(vehicles);
     }
 
     @Override
@@ -127,8 +120,41 @@ public class VehicleServiceImpl implements VehicleService {
         List<Vehicle> vehicles = vehicleRepository.findByModel(model);
         for (Vehicle v : vehicles) {
             v.setCampaign(null);
-            vehicleRepository.save(v);
+        }
+        vehicleRepository.saveAll(vehicles);
+    }
+
+    @Override
+    public void assignCampaignToVehicleByVin(int campaignId, String vin) {
+        Campaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with ID: " + campaignId));
+
+        Vehicle vehicle = vehicleRepository.findByVin(vin);
+        if (vehicle == null) {
+            throw new ResourceNotFoundException("Vehicle not found with VIN: " + vin);
+        }
+
+        if (!vehicle.getModel().equalsIgnoreCase(campaign.getModel())) {
+            throw new InvalidOperationException("Vehicle model (" + vehicle.getModel() +
+                    ") does not match campaign model (" + campaign.getModel() + ")");
+        }
+
+        if (vehicle.getCampaign() == null || vehicle.getCampaign().getCampaignId() != campaignId) {
+            vehicle.setCampaign(campaign);
+            vehicleRepository.save(vehicle);
         }
     }
 
+    @Override
+    public void removeCampaignFromVehicleByVin(String vin) {
+        Vehicle vehicle = vehicleRepository.findByVin(vin);
+        if (vehicle == null) {
+            throw new ResourceNotFoundException("Vehicle not found with VIN: " + vin);
+        }
+
+        if (vehicle.getCampaign() != null) {
+            vehicle.setCampaign(null);
+            vehicleRepository.save(vehicle);
+        }
+    }
 }

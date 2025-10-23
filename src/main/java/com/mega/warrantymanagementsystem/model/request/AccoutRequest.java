@@ -14,22 +14,16 @@ import lombok.NoArgsConstructor;
 public class AccoutRequest {
     @NotEmpty(message = "ID cannot be empty!")//không được để trống
     private String accountId;
-
     @NotEmpty(message = "Username cannot be empty!")
     private String username;
-
     @NotEmpty(message = "Password cannot be empty!")
     private String password;
-
     @NotEmpty(message = "Full name cannot be empty!")
     private String fullName;
-
     //true = Male, false = Female
     private Boolean gender;
-
     @Email
     private String email;
-
     @NotEmpty(message = "phone cannot be empty!")
     private String phone;
 }
