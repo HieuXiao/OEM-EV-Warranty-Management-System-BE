@@ -50,7 +50,7 @@ public class PartUnderWarrantyController {
         Account currentUser = (Account) authentication.getPrincipal();
 
         // kiểm tra quyền admin
-        if (!currentUser.getRole().getRoleName().name().equals("Admin")) {
+        if (!currentUser.getRole().getRoleName().name().equalsIgnoreCase("ADMIN")) {
             throw new IllegalArgumentException("You are not authorized to create part");
         }
 
