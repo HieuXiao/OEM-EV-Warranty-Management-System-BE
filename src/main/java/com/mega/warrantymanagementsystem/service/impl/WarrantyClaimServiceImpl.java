@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service.impl;
 
 import com.mega.warrantymanagementsystem.entity.*;
+import com.mega.warrantymanagementsystem.entity.entity.RoleName;
 import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
 import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
@@ -46,11 +47,26 @@ public class WarrantyClaimServiceImpl implements WarrantyClaimService {
         Vehicle vehicle = vehicleRepository.findByVin(request.getVin());
         if (vehicle == null) throw new ResourceNotFoundException("Vehicle not found");
 
-        Account staff = accountRepository.findByAccountId(request.getScStaffId());
-        if (staff == null) throw new ResourceNotFoundException("SC Staff not found");
+        String staffId = request.getScStaffId().toUpperCase();
+        Account staff = accountRepository.findByAccountId(staffId);
+        if (staff == null) {
+            throw new ResourceNotFoundException("SC Staff not found with ID: " + staffId);
+        }
+        RoleName staffRole = staff.getRole().getRoleName();
+        if (!(staffRole == RoleName.SC_STAFF || staffId.startsWith("SS"))) {
+            throw new BusinessLogicException("Account " + staffId + " is not a Service Center Staff (SC_STAFF).");
+        }
 
-        Account technician = accountRepository.findByAccountId(request.getScTechnicianId());
-        if (technician == null) throw new ResourceNotFoundException("Technician not found");
+        // --- Kiểm tra SC Technician ---
+        String technicianId = request.getScTechnicianId().toUpperCase();
+        Account technician = accountRepository.findByAccountId(technicianId);
+        if (technician == null) {
+            throw new ResourceNotFoundException("SC Technician not found with ID: " + technicianId);
+        }
+        RoleName techRole = technician.getRole().getRoleName();
+        if (!(techRole == RoleName.SC_TECHNICIAN || technicianId.startsWith("ST"))) {
+            throw new BusinessLogicException("Account " + technicianId + " is not a Service Center Technician (SC_TECHNICIAN).");
+        }
 
         Policy policy = policyRepository.findById(request.getPolicyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
@@ -118,11 +134,34 @@ public class WarrantyClaimServiceImpl implements WarrantyClaimService {
 
     // ---------------- DELETE ----------------
     @Override
+    @Transactional
     public void deleteWarrantyClaim(int claimId) {
         WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
+
+        // Ngắt liên kết trước khi xóa
+        if (claim.getClaimAttachments() != null) {
+            for (ClaimAttachment att : claim.getClaimAttachments()) {
+                att.setWarrantyClaim(null);
+            }
+        }
+
+        if (claim.getClaimReplacementParts() != null) {
+            for (ClaimReplacementPart part : claim.getClaimReplacementParts()) {
+                part.setWarrantyClaim(null);
+            }
+        }
+
+        if (claim.getServiceRecords() != null) {
+            for (ServiceRecord sr : claim.getServiceRecords()) {
+                sr.setWarrantyClaim(null);
+            }
+        }
+
+        // Xóa cha
         warrantyClaimRepository.delete(claim);
     }
+
 
     // ---------------- ATTACHMENTS ----------------
     @Override
