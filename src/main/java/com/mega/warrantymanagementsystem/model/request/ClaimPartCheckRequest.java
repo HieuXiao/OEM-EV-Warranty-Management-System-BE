@@ -5,17 +5,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class PolicyRequest {
+public class ClaimPartCheckRequest {
     @NotEmpty
-    private String policyName;
+    private String partSerialId;
 
     @NotNull
-    private Integer availableYear;
+    private Integer claimId;
 
     @NotNull
-    private Integer kilometer;
+    private Integer quantity;
 
-    private boolean isEnable;
-
-    private String partSerial; // ID của PartUnderWarranty
+    private boolean isRepair;
 }

@@ -1,37 +1,24 @@
 package com.mega.warrantymanagementsystem.model.response;
 
-import com.mega.warrantymanagementsystem.entity.Campaign;
-import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor   // cần cho Jackson
-@AllArgsConstructor
 public class WarrantyClaimResponse {
-
     private int claimId;
-    private String vin; // từ Vehicle
-    private String scStaffId;
-    private String scTechnicianId;
-    private String evmId;
-    private int policyId;
     private LocalDate claimDate;
-    private WarrantyClaimStatus status;
+    private String status;
     private String description;
     private String evmDescription;
     private boolean technicianDone;
     private boolean scStaffDone;
 
-    // Liệt kê danh sách các part, attachment, record liên quan
-    private List<ClaimReplacementPartResponse> claimReplacementParts;
-    private List<ClaimAttachmentResponse> claimAttachments;
-    private List<ServiceRecordResponse> serviceRecords;
-    private List<CampaignResponse> campaigns;
-
+    private VehicleResponse vehicle;
+    private AccountResponse serviceCenterStaff;
+    private AccountResponse serviceCenterTechnician;
+    private AccountResponse evm;
+    private PolicyResponse policy;
+    private List<ClaimPartCheckResponse> claimPartChecks;
+    private List<WarrantyFileResponse> warrantyFiles;
 }

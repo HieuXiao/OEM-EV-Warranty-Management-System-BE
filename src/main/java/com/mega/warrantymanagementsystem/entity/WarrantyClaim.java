@@ -20,9 +20,8 @@ public class WarrantyClaim {
 
     // ------------------ Khóa chính ------------------
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "claim_id")
-    private int claimId;
+    private String claimId;
 
     // ------------------ Quan hệ với Vehicle ------------------
     @ManyToOne(fetch = FetchType.LAZY)
@@ -79,11 +78,6 @@ public class WarrantyClaim {
     @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<WarrantyFile> warrantyFiles = new ArrayList<>();
-
-    // ------------------ Quan hệ với ServiceRecord ------------------
-//    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
-//    @JsonIgnore
-//    private List<ServiceRecord> serviceRecords = new ArrayList<>();
 
     // ------------------- Quan hệ với Campaign -----------------------
     @ManyToMany

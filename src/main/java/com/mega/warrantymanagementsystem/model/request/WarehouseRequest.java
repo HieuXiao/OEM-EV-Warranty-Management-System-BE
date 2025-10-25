@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class ServiceCenterRequest {
+public class WarehouseRequest {
     @NotEmpty
-    private String centerName;
+    private String name;
 
     @NotEmpty
     private String location;

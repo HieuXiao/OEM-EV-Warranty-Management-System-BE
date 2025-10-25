@@ -1,16 +1,13 @@
 package com.mega.warrantymanagementsystem.model.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class PolicyResponse {
     private int policyId;
+    private String policyName;
+    private int availableYear;
     private int kilometer;
-    private String policyPart;
-    private String policyModel;
-    private int policyYear;
+    private boolean isEnable;
+    private PartUnderWarrantyResponse partUnderWarranty;
 }

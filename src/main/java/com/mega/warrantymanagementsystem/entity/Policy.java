@@ -29,11 +29,10 @@ public class Policy {
     private int kilometer;
 
     @Column(name = "isEnable", nullable = false)
-    private boolean isEnable;
+    private Boolean isEnable;
 
     // Liên kết đến bảng Parts_Under_Warranty
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_serial")
     private PartUnderWarranty partUnderWarranty;
-
 }

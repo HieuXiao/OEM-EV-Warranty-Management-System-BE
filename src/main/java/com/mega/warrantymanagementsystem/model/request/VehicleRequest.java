@@ -1,17 +1,25 @@
 package com.mega.warrantymanagementsystem.model.request;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor   // cần cho Jackson
-@AllArgsConstructor
 public class VehicleRequest {
+    @NotEmpty
     private String vin;
+
+    @NotEmpty
     private String plate;
+
+    @NotEmpty
     private String type;
+
+    @NotEmpty
     private String color;
+
+    @NotEmpty
     private String model;
-    private String customerPhone;
+
+    private Integer campaignId;
+    private Integer customerId;
 }

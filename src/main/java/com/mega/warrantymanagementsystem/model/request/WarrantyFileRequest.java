@@ -2,12 +2,12 @@ package com.mega.warrantymanagementsystem.model.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import java.util.List;
 
 @Data
-public class ServiceCenterRequest {
+public class WarrantyFileRequest {
     @NotEmpty
-    private String centerName;
-
-    @NotEmpty
-    private String location;
+    private String fileId;
+    private Integer claimId;
+    private List<String> imageUrl;
 }

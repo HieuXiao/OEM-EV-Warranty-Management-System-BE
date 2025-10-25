@@ -1,25 +1,17 @@
 package com.mega.warrantymanagementsystem.model.response;
 
-import lombok.AllArgsConstructor;
+import com.mega.warrantymanagementsystem.entity.entity.RoleName;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor//tự động sinh constructor có tham số
-@NoArgsConstructor//tự động sinh constructor không tham số
 public class AccountResponse {
-    String accountId;
-    String username;
-    String fullName;
-    Boolean gender;
-    String email;
-    String phone;
-    String token;
-
-    String roleName;
-
+    private String accountId;
+    private String username;
+    private String fullName;
+    private Boolean gender;
+    private String email;
+    private String phone;
     private boolean enabled;
-
-    // Gói lại thông tin Service Center
+    private RoleName roleName;
     private ServiceCenterResponse serviceCenter;
 }
