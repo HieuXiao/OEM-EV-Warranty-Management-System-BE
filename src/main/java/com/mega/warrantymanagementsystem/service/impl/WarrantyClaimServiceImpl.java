@@ -130,7 +130,7 @@
 //    public void addAttachmentToClaim(int claimId, int attachmentId) {
 //        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
-//        WarrantyFile attach = claimAttachmentRepository.findById(attachmentId)
+//        ClaimAttachment attach = claimAttachmentRepository.findById(attachmentId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Attachment not found"));
 //        attach.setWarrantyClaim(claim);
 //        claimAttachmentRepository.save(attach);
@@ -146,7 +146,7 @@
 //    public void removeAttachmentFromClaim(int claimId, int attachmentId) {
 //        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
-//        WarrantyFile attachment = claimAttachmentRepository.findById(attachmentId)
+//        ClaimAttachment attachment = claimAttachmentRepository.findById(attachmentId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Attachment not found"));
 //        if (attachment.getWarrantyClaim() == null
 //                || attachment.getWarrantyClaim().getClaimId() != claim.getClaimId()) {
@@ -162,7 +162,7 @@
 //    public void addReplacementPartToClaim(int claimId, int partUserId) {
 //        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
-//        ClaimPartCheck part = claimReplacementPartRepository.findById(partUserId)
+//        ClaimReplacementPart part = claimReplacementPartRepository.findById(partUserId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Part not found"));
 //        part.setWarrantyClaim(claim);
 //        claimReplacementPartRepository.save(part);
@@ -178,7 +178,7 @@
 //    public void removeReplacementPartFromClaim(int claimId, int partUserId) {
 //        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
-//        ClaimPartCheck replacementPart = claimReplacementPartRepository.findById(partUserId)
+//        ClaimReplacementPart replacementPart = claimReplacementPartRepository.findById(partUserId)
 //                .orElseThrow(() -> new ResourceNotFoundException("ReplacementPart not found"));
 //        if (replacementPart.getWarrantyClaim() == null
 //                || replacementPart.getWarrantyClaim().getClaimId() != claim.getClaimId()) {
@@ -254,8 +254,8 @@
 //        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
 //                .orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
 //
-//        boolean hasComponent = !claim.getWarrantyFiles().isEmpty()
-//                || !claim.getClaimPartChecks().isEmpty()
+//        boolean hasComponent = !claim.getClaimAttachments().isEmpty()
+//                || !claim.getClaimReplacementParts().isEmpty()
 //                || !claim.getServiceRecords().isEmpty();
 //
 //        if (!hasComponent)

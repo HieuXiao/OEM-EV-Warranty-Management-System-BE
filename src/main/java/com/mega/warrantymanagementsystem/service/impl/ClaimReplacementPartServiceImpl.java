@@ -1,6 +1,6 @@
 //package com.mega.warrantymanagementsystem.service.impl;
 //
-//import com.mega.warrantymanagementsystem.entity.ClaimPartCheck;
+//import com.mega.warrantymanagementsystem.entity.ClaimReplacementPart;
 //import com.mega.warrantymanagementsystem.entity.Part;
 //import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 //import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
@@ -36,16 +36,16 @@
 //
 //    @Override
 //    public ClaimReplacementPartResponse findById(int id) {
-//        ClaimPartCheck part = claimReplacementPartRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("ClaimPartCheck not found with ID: " + id));
+//        ClaimReplacementPart part = claimReplacementPartRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("ClaimReplacementPart not found with ID: " + id));
 //        return mapToResponse(part);
 //    }
 //
 //    @Override
 //    public List<ClaimReplacementPartResponse> findAll() {
-//        List<ClaimPartCheck> claimReplacementParts = claimReplacementPartRepository.findAll();
+//        List<ClaimReplacementPart> claimReplacementParts = claimReplacementPartRepository.findAll();
 //        List<ClaimReplacementPartResponse> claimReplacementPartResponses = new ArrayList<>();
-//        for(ClaimPartCheck c : claimReplacementParts){
+//        for(ClaimReplacementPart c : claimReplacementParts){
 //            claimReplacementPartResponses.add(mapToResponse(c));
 //        }
 //        return claimReplacementPartResponses;
@@ -59,7 +59,7 @@
 //            throw new ResourceNotFoundException("Part ID cannot be null");
 //        }
 //
-//        ClaimPartCheck entity = new ClaimPartCheck();
+//        ClaimReplacementPart entity = new ClaimReplacementPart();
 //
 //        Part part = partRepository.findById(request.getPartId())
 //                .orElseThrow(() -> new ResourceNotFoundException("Part not found with ID: " + request.getPartId()));
@@ -75,14 +75,14 @@
 //            entity.setWarrantyClaim(claim);
 //        }
 //
-//        ClaimPartCheck saved = claimReplacementPartRepository.save(entity);
+//        ClaimReplacementPart saved = claimReplacementPartRepository.save(entity);
 //        return mapToResponse(saved);
 //    }
 //
 //    @Override
 //    public ClaimReplacementPartResponse updateClaimReplacementPart(int id, ClaimReplacementPartRequest request) {
-//        ClaimPartCheck existing = claimReplacementPartRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("ClaimPartCheck not found with ID: " + id));
+//        ClaimReplacementPart existing = claimReplacementPartRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("ClaimReplacementPart not found with ID: " + id));
 //
 //        if (request.getPartId() != null) {
 //            Part part = partRepository.findById(request.getPartId())
@@ -100,18 +100,18 @@
 //        existing.setReason(request.getReason());
 //        existing.setDescription(request.getDescription());
 //
-//        ClaimPartCheck updated = claimReplacementPartRepository.save(existing);
+//        ClaimReplacementPart updated = claimReplacementPartRepository.save(existing);
 //        return mapToResponse(updated);
 //    }
 //
 //    @Override
 //    public void deleteClaimReplacementPart(int id) {
-//        ClaimPartCheck existing = claimReplacementPartRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("ClaimPartCheck not found with ID: " + id));
+//        ClaimReplacementPart existing = claimReplacementPartRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("ClaimReplacementPart not found with ID: " + id));
 //        claimReplacementPartRepository.delete(existing);
 //    }
 //
-//    private ClaimReplacementPartResponse mapToResponse(ClaimPartCheck entity) {
+//    private ClaimReplacementPartResponse mapToResponse(ClaimReplacementPart entity) {
 //        ClaimReplacementPartResponse response = new ClaimReplacementPartResponse();
 //        response.setPartUserId(entity.getPartUserId());
 //        response.setQuantity(entity.getQuantity());

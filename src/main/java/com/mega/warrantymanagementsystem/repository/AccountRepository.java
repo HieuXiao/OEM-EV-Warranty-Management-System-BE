@@ -17,5 +17,5 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     List<Account> findByServiceCenter_CenterId(int centerId);
 
     List<Account> findByRole_RoleName(RoleName roleName);
-    ;
+    List<Account> findByRole_RoleNameAndEnabledTrue(RoleName roleName);
 }
