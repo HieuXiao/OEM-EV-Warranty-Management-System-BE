@@ -15,7 +15,7 @@ public class PolicyRequest {
     @NotNull
     private Integer kilometer;
 
-    private boolean isEnable;
+    private Boolean isEnable;
 
     private String partSerial; // ID của PartUnderWarranty
 }

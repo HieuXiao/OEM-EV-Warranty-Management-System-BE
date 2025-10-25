@@ -8,6 +8,6 @@ import java.util.List;
 public class WarrantyFileRequest {
     @NotEmpty
     private String fileId;
-    private Integer claimId;
+    private String claimId;
     private List<String> imageUrl;
 }

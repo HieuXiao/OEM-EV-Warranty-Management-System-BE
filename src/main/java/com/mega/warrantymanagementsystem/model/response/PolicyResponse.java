@@ -8,6 +8,6 @@ public class PolicyResponse {
     private String policyName;
     private int availableYear;
     private int kilometer;
-    private boolean isEnable;
+    private Boolean isEnable;
     private PartUnderWarrantyResponse partUnderWarranty;
 }

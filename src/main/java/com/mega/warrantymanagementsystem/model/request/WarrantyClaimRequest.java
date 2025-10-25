@@ -12,7 +12,6 @@ public class WarrantyClaimRequest {
     private String evmId;
     private Integer policyId;
     private LocalDate claimDate;
-    private String status;
     private String description;
     private String evmDescription;
 }

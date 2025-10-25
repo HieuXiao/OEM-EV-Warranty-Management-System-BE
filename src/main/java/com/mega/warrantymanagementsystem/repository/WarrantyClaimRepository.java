@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface WarrantyClaimRepository extends JpaRepository<WarrantyClaim, Integer> {
+public interface WarrantyClaimRepository extends JpaRepository<WarrantyClaim, String> {
 
     // Tìm theo từng thuộc tính riêng
     List<WarrantyClaim> findByServiceCenterStaff_AccountId(String accountId);

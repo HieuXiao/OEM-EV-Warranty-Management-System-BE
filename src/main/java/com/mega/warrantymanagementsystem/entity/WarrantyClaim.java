@@ -89,5 +89,15 @@ public class WarrantyClaim {
     @JsonIgnore
     private List<Campaign> campaigns = new ArrayList<>();
 
+    /**
+     * Đảm bảo khi tạo mới (persist) mà status chưa được set,
+     * thì mặc định là CHECK.
+     */
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = WarrantyClaimStatus.CHECK;
+        }
+    }
 
 }

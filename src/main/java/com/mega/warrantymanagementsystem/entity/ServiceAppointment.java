@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,9 @@ public class ServiceAppointment {
     @JsonIgnore
     private Campaign campaign;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "appointment_date", nullable = false)
     @NotNull(message = "Appointment date cannot be null!")
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
