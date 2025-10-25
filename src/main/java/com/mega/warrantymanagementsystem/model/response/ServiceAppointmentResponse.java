@@ -6,8 +6,7 @@ import java.time.LocalDateTime;
 @Data
 public class ServiceAppointmentResponse {
     private int appointmentId;
-    private LocalDateTime appointmentDate;
-    private String status;
+    private LocalDateTime date;
     private String description;
     private VehicleResponse vehicle;
     private CampaignResponse campaign;

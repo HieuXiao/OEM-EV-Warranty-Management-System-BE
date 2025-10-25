@@ -10,4 +10,5 @@ import java.util.List;
 public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, Integer> {
     ServiceCenter findByCenterName(String name);
     List<ServiceCenter> findByLocation(String location);
+
 }

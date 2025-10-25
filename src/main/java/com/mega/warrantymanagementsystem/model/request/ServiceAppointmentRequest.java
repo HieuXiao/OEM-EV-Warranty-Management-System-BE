@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 public class ServiceAppointmentRequest {
     private String vin;
     private Integer campaignId;
-    private LocalDateTime appointmentDate;
-    private String status;
+    private LocalDateTime date; // đổi tên để khớp với entity
     private String description;
 }

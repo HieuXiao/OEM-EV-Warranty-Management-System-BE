@@ -34,16 +34,11 @@ public class ServiceAppointment {
     @JsonIgnore
     private Campaign campaign;
 
-    @Column(name = "appointment_date", nullable = false)
+    @Column(name = "date", nullable = false)
     @NotNull(message = "Appointment date cannot be null!")
-    private LocalDateTime appointmentDate;
-
-    @Column(name = "status", length = 50)
-    @NotEmpty(message = "Status cannot be empty!")
-    private String status;
+    private LocalDateTime date;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
 
 }
