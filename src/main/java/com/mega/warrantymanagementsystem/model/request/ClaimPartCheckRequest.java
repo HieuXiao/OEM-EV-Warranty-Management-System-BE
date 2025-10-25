@@ -6,14 +6,19 @@ import lombok.Data;
 
 @Data
 public class ClaimPartCheckRequest {
-    @NotEmpty
-    private String partSerialId;
+    @NotEmpty(message = "partNumber cannot be empty")
+    private String partNumber; // PK
 
-    @NotNull
-    private Integer claimId;
+    @NotEmpty(message = "warrantyId cannot be empty")
+    private String warrantyId; // FK → WarrantyClaim.claimId
 
-    @NotNull
+    @NotEmpty(message = "vin cannot be empty")
+    private String vin; // FK → Vehicle.vin
+
+    @NotNull(message = "quantity cannot be null")
     private Integer quantity;
 
     private boolean isRepair;
+
+    private String partSerial; // optional
 }
