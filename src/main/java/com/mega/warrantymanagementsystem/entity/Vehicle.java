@@ -22,7 +22,7 @@ public class Vehicle {
     @Pattern(
             regexp = "^[A-HJ-NPR-Z0-9]{17}$", message = "VIN valid"
     )//- cho phép các chữ cái từ A đến Z, loại trừ I, O, Q. 17 ký tự
-    @Column(name = "vin", nullable = false, length = 17)
+    @Column(name = "vin", nullable = false, length = 17, unique = true)
     @NotEmpty(message = "vin can not be empty")
     private String vin;
 
