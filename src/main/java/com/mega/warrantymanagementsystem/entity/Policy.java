@@ -33,7 +33,7 @@ public class Policy {
 
     // Liên kết đến bảng Parts_Under_Warranty
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "part_serial", referencedColumnName = "part_serial", nullable = false)
+    @JoinColumn(name = "part_serial")
     private PartUnderWarranty partUnderWarranty;
 
 }
