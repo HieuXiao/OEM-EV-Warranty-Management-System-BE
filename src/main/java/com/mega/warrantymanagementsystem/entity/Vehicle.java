@@ -51,5 +51,4 @@ public class Vehicle {
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     private Customer customer;
-
 }

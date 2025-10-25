@@ -5,13 +5,18 @@ import lombok.Data;
 
 @Data
 public class AccountResponse {
-    private String accountId;
-    private String username;
-    private String fullName;
-    private Boolean gender;
-    private String email;
-    private String phone;
+    String accountId;
+    String username;
+    String fullName;
+    Boolean gender;
+    String email;
+    String phone;
+    String token;
+
+    String roleName;
+
     private boolean enabled;
-    private RoleName roleName;
+
+    // Gói lại thông tin Service Center
     private ServiceCenterResponse serviceCenter;
 }

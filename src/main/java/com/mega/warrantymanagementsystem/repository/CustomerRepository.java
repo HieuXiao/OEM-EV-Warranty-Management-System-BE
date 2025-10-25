@@ -11,5 +11,6 @@
         Customer findByCustomerPhone(String phone);
         Customer findByCustomerEmail(String email);
         List<Customer> findByCustomerNameContaining(String name);
-
+        boolean existsByCustomerPhone(String phone);
+        boolean existsByCustomerEmail(String email);
     }

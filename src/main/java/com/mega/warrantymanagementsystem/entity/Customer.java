@@ -46,7 +46,7 @@ public class Customer {
     @NotEmpty(message = "Address cannot be empty!")
     private String customerAddress;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Vehicle> vehicles = new ArrayList<>();
+//    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonIgnore
+//    private List<Vehicle> vehicles = new ArrayList<>();
 }

@@ -10,5 +10,5 @@ public class CustomerResponse {
     private String customerPhone;
     private String customerEmail;
     private String customerAddress;
-    private List<VehicleResponse> vehicles;
+//    private List<VehicleResponse> vehicles;
 }

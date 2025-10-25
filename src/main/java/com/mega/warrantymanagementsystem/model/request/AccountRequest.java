@@ -5,33 +5,18 @@ import lombok.Data;
 
 @Data
 public class AccountRequest {
-
-    @Pattern(regexp = "^(AD|ST|SS|ES)[0-9]{6}$")
+    @NotEmpty(message = "ID cannot be empty!")//không được để trống
     private String accountId;
-
-    @NotEmpty
+    @NotEmpty(message = "Username cannot be empty!")
     private String username;
-
-    @NotEmpty
+    @NotEmpty(message = "Password cannot be empty!")
     private String password;
-
-    @NotEmpty
+    @NotEmpty(message = "Full name cannot be empty!")
     private String fullName;
-
-    @NotNull
+    //true = Male, false = Female
     private Boolean gender;
-
     @Email
     private String email;
-
-    @NotEmpty
+    @NotEmpty(message = "phone cannot be empty!")
     private String phone;
-
-    // RoleName enum dưới dạng String (ADMIN, SC_STAFF, SC_TECHNICIAN, EVM_STAFF)
-    @NotEmpty
-    private String roleName;
-
-    private Integer serviceCenterId;
-
-    private boolean enabled = true;
 }
