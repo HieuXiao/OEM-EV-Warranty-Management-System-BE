@@ -45,8 +45,5 @@ public class ServiceAppointment {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    // Một lịch hẹn có thể tạo ra nhiều ServiceRecord
-    @OneToMany(mappedBy = "serviceAppointment", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<ServiceRecord> serviceRecords = new ArrayList<>();
+
 }

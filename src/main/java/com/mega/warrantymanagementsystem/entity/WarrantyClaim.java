@@ -70,20 +70,20 @@ public class WarrantyClaim {
     @Column(name = "sc_staff_done", nullable = false)
     private boolean scStaffDone = false;
 
-    // ------------------ Quan hệ với ClaimReplacementPart ------------------
+    // ------------------ Quan hệ với ClaimPartCheck ------------------
     @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<ClaimReplacementPart> claimReplacementParts = new ArrayList<>();
+    private List<ClaimPartCheck> claimPartChecks = new ArrayList<>();
 
-    // ------------------ Quan hệ với ClaimAttachment ------------------
+    // ------------------ Quan hệ với WarrantyFile ------------------
     @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<ClaimAttachment> claimAttachments = new ArrayList<>();
+    private List<WarrantyFile> warrantyFiles = new ArrayList<>();
 
     // ------------------ Quan hệ với ServiceRecord ------------------
-    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<ServiceRecord> serviceRecords = new ArrayList<>();
+//    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
+//    @JsonIgnore
+//    private List<ServiceRecord> serviceRecords = new ArrayList<>();
 
     // ------------------- Quan hệ với Campaign -----------------------
     @ManyToMany

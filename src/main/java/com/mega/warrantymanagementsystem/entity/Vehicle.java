@@ -52,8 +52,4 @@ public class Vehicle {
     @JsonIgnore
     private Customer customer;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ServiceRecord> serviceRecords;
-
-
 }

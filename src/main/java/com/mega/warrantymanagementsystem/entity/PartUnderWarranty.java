@@ -21,7 +21,7 @@ public class PartUnderWarranty {
 
     //------------------Liên kết Account (Admin quản lý part)------------------------
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", referencedColumnName = "accountId", nullable = false)
+    @JoinColumn(name = "adminId", referencedColumnName = "accountId", nullable = false)
     @JsonIgnore
     private Account admin;
 
@@ -31,8 +31,8 @@ public class PartUnderWarranty {
     private String partName;
 
     //------------------Hãng part------------------------
-    @Column(name = "part_branch", length = 50)
-    private String partBranch;
+    @Column(name = "part_brand", length = 50)
+    private String partBrand;
 
     //------------------Giá------------------------
     @Column(name = "price")
@@ -45,5 +45,8 @@ public class PartUnderWarranty {
     //------------------Mô tả------------------------
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-}
 
+    //------------------Trạng thái------------------------
+    @Column(name = "is_enable")
+    private Boolean isEnable;
+}

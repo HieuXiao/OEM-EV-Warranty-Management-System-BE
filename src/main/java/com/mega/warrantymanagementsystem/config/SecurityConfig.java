@@ -1,6 +1,6 @@
 package com.mega.warrantymanagementsystem.config;
 
-import com.mega.warrantymanagementsystem.service.AccountService;
+//import com.mega.warrantymanagementsystem.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

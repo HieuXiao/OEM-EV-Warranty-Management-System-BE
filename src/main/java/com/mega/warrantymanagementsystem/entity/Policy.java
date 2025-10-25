@@ -1,47 +1,39 @@
 package com.mega.warrantymanagementsystem.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "Policies")
 @Data
-@Table(name = "policy")
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Policy {
 
-    //------------------ID------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "policy_id")
+    @Column(name = "policyId")
     private int policyId;
 
-    //------------------Kilometer------------------------
-    @Column(name = "kilometer", nullable = false)
-    @NotNull(message = "Kilometer cannot be null")
+    @Column(name = "policyName", length = 100, nullable = false)
+    @NotEmpty(message = "Policy name cannot be empty")
+    private String policyName;
+
+    @Column(name = "availableYear", nullable = false)
+    private int availableYear;
+
+    @Column(name = "Kilometer", nullable = false)
     private int kilometer;
 
-    //------------------Policy Part------------------------
-    @Column(name = "policy_part", length = 10, nullable = false)
-    @Size(max = 10, message = "Policy part must be less than or equal to 10 characters")
-    private String policyPart;
+    @Column(name = "isEnable", nullable = false)
+    private boolean isEnable;
 
-    //------------------Policy Model------------------------
-    @Column(name = "policy_model", length = 50, nullable = false)
-    @Size(max = 50, message = "Policy model must be less than or equal to 50 characters")
-    private String policyModel;
+    // Liên kết đến bảng Parts_Under_Warranty
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "part_serial", referencedColumnName = "part_serial", nullable = false)
+    private PartUnderWarranty partUnderWarranty;
 
-    //------------------Policy Year------------------------
-    @Column(name = "policy_year", nullable = false)
-    private int policyYear;
-
-    //------------------(Bỏ FK employee_id vì chưa có bảng employee)------------------------
-    // Khi có bảng Employee, thêm lại:
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "employee_id", nullable = false)
-    // private Employee employee;
 }

@@ -3,13 +3,9 @@ package com.mega.warrantymanagementsystem.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -18,33 +14,28 @@ import java.util.List;
 @NoArgsConstructor
 public class Part {
 
-    //------------------Id------------------------
+    //------------------Primary Key------------------------
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "part_id")
-    private int partId;
+    @Column(name = "part_serial", length = 20)
+    @NotEmpty(message = "Part serial cannot be empty!")
+    private String partSerial;
 
     //------------------Tên part------------------------
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name_part", nullable = false, length = 100)
     @NotEmpty(message = "Part name cannot be empty!")
-    private String name;
+    private String namePart;
 
-    //------------------Số serial------------------------
-    @Column(name = "serial_number", length = 50, unique = true)
-    @NotEmpty(message = "Serial number cannot be empty!")
-    private String serialNumber;
+    //------------------Số lượng------------------------
+    @Column(name = "quantity")
+    private int quantity;
 
-    //------------------Mô tả------------------------
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    //------------------Giá------------------------
+    @Column(name = "price")
+    private float price;
 
-    //------------------Liên kết inventory------------------------
+    //------------------Liên kết warehouse------------------------
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inventory_id", nullable = false)
+    @JoinColumn(name = "whId", nullable = false)
     @JsonIgnore
-    private Inventory inventoryId;
-
-    @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<ClaimReplacementPart> claimReplacementParts = new ArrayList<>();
+    private Warehouse warehouse;
 }
