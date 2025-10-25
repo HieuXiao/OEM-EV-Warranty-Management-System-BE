@@ -26,6 +26,6 @@ public class ClaimPartCheck {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "isR")
-    private boolean isR;
+    @Column(name = "isRepair")
+    private boolean isRepair;
 }
