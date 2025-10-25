@@ -24,7 +24,7 @@ public interface WarrantyClaimRepository extends JpaRepository<WarrantyClaim, In
 
     List<WarrantyClaim> findByStatus(WarrantyClaimStatus status);
 
-    WarrantyClaim findByClaimId(int claimId);
+    WarrantyClaim findByClaimId(String claimId);
 
     // Tìm theo VIN (Vehicle)
     List<WarrantyClaim> findByVehicle_Vin(String vin);

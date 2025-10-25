@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface WarrantyFileRepository extends JpaRepository<WarrantyFile, String> {
-    List<WarrantyFile> findByWarrantyClaim_ClaimId(int claimId);
+    List<WarrantyFile> findByWarrantyClaim_ClaimId(String claimId);
 
 }
