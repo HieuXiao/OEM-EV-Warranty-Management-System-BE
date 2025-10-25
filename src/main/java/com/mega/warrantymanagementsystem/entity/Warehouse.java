@@ -28,6 +28,9 @@ public class Warehouse {
     private String location;
 
     // Lưu danh sách low_part (các part số lượng thấp)
+    @ElementCollection
+    @CollectionTable(name = "warehouse_low_part", joinColumns = @JoinColumn(name = "whId"))
     @Column(name = "part_name")
     private List<String> lowPart;
+
 }
