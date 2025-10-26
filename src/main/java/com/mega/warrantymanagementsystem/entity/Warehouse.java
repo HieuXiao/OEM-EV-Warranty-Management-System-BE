@@ -1,5 +1,6 @@
 package com.mega.warrantymanagementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,10 @@ public class Warehouse {
     @CollectionTable(name = "warehouse_low_part", joinColumns = @JoinColumn(name = "whId"))
     @Column(name = "part_name")
     private List<String> lowPart;
+
+    // Thêm quan hệ ngược
+    @OneToMany(mappedBy = "warehouse")
+    @JsonIgnore
+    private List<Part> parts;
 
 }

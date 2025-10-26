@@ -18,7 +18,7 @@ public class ClaimPartCheck {
     private String partNumber; // PK
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warranty_id", nullable = false)
+    @JoinColumn(name = "claim_id", nullable = false)
     @JsonIgnore
     private WarrantyClaim warrantyClaim; // FK → WarrantyClaim.claimId
 

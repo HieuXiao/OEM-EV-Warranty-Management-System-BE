@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 /**
  * Xử lý nghiệp vụ cho WarrantyClaim.
  * - CRUD cơ bản
- * - Search theo ngày, trạng thái
- * - Status mặc định là CHECK khi tạo mới
+ * - Status mặc định CHECK khi tạo
+ * - Không can thiệp status thủ công (status cập nhật qua luồng chính)
  */
 @Service
 public class WarrantyClaimService {
@@ -36,66 +36,80 @@ public class WarrantyClaimService {
     private ModelMapper modelMapper;
 
     /**
-     * Tạo mới WarrantyClaim (status mặc định là CHECK)
+     * Tạo mới WarrantyClaim (status mặc định CHECK)
      */
     public WarrantyClaimResponse create(WarrantyClaimRequest request) {
         WarrantyClaim claim = new WarrantyClaim();
 
         claim.setClaimId(request.getClaimId());
-        claim.setClaimDate(request.getClaimDate());
+        claim.setClaimDate(request.getClaimDate() != null ? request.getClaimDate() : LocalDate.now());
         claim.setDescription(request.getDescription());
-        claim.setEvmDescription(request.getEvmDescription());
+        claim.setStatus(WarrantyClaimStatus.CHECK); // mặc định
 
-        // Mặc định status CHECK
-        claim.setStatus(WarrantyClaimStatus.CHECK);
+        // Quan hệ Vehicle
+        Vehicle vehicle = vehicleRepository.findById(request.getVin())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin()));
+        claim.setVehicle(vehicle);
 
-        // Map quan hệ
-        claim.setVehicle(vehicleRepository.findById(request.getVin())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin())));
-
+        // Quan hệ Staff
         if (request.getScStaffId() != null) {
-            claim.setServiceCenterStaff(accountRepository.findById(request.getScStaffId())
-                    .orElseThrow(() -> new ResourceNotFoundException("SC Staff not found: " + request.getScStaffId())));
+            Account scStaff = accountRepository.findById(request.getScStaffId())
+                    .orElseThrow(() -> new ResourceNotFoundException("SC Staff not found: " + request.getScStaffId()));
+            claim.setServiceCenterStaff(scStaff);
         }
 
+        // Quan hệ Technician
         if (request.getScTechnicianId() != null) {
-            claim.setServiceCenterTechnician(accountRepository.findById(request.getScTechnicianId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found: " + request.getScTechnicianId())));
-        }
-
-        if (request.getEvmId() != null) {
-            claim.setEvm(accountRepository.findById(request.getEvmId())
-                    .orElseThrow(() -> new ResourceNotFoundException("EVM not found: " + request.getEvmId())));
+            Account scTech = accountRepository.findById(request.getScTechnicianId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found: " + request.getScTechnicianId()));
+            claim.setServiceCenterTechnician(scTech);
         }
 
         WarrantyClaim saved = warrantyClaimRepository.save(claim);
-        return modelMapper.map(saved, WarrantyClaimResponse.class);
+        WarrantyClaimResponse response = modelMapper.map(saved, WarrantyClaimResponse.class);
+        response.setStatus(saved.getStatus().name());
+        return response;
     }
 
     /**
-     * Cập nhật claim (không cho sửa status ở đây)
+     * Cập nhật claim (chỉ cho phép sửa thông tin mô tả, ngày, quan hệ)
      */
     public WarrantyClaimResponse update(String id, WarrantyClaimRequest request) {
         WarrantyClaim existing = warrantyClaimRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WarrantyClaim not found: " + id));
 
-        existing.setClaimDate(request.getClaimDate());
-        existing.setDescription(request.getDescription());
-        existing.setEvmDescription(request.getEvmDescription());
+        if (request.getClaimDate() != null)
+            existing.setClaimDate(request.getClaimDate());
 
-        // Quan hệ có thể thay đổi (nếu cần)
+        if (request.getDescription() != null)
+            existing.setDescription(request.getDescription());
 
         if (request.getVin() != null) {
-            existing.setVehicle(vehicleRepository.findById(request.getVin())
-                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin())));
+            Vehicle vehicle = vehicleRepository.findById(request.getVin())
+                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin()));
+            existing.setVehicle(vehicle);
+        }
+
+        if (request.getScStaffId() != null) {
+            Account scStaff = accountRepository.findById(request.getScStaffId())
+                    .orElseThrow(() -> new ResourceNotFoundException("SC Staff not found: " + request.getScStaffId()));
+            existing.setServiceCenterStaff(scStaff);
+        }
+
+        if (request.getScTechnicianId() != null) {
+            Account scTech = accountRepository.findById(request.getScTechnicianId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found: " + request.getScTechnicianId()));
+            existing.setServiceCenterTechnician(scTech);
         }
 
         WarrantyClaim updated = warrantyClaimRepository.save(existing);
-        return modelMapper.map(updated, WarrantyClaimResponse.class);
+        WarrantyClaimResponse response = modelMapper.map(updated, WarrantyClaimResponse.class);
+        response.setStatus(updated.getStatus().name());
+        return response;
     }
 
     /**
-     * Xóa claim theo ID
+     * Xóa claim theo ID (chỉ xóa claim, không cascade sang bảng khác)
      */
     public void delete(String id) {
         if (!warrantyClaimRepository.existsById(id)) {
@@ -109,7 +123,11 @@ public class WarrantyClaimService {
      */
     public List<WarrantyClaimResponse> getAll() {
         return warrantyClaimRepository.findAll().stream()
-                .map(c -> modelMapper.map(c, WarrantyClaimResponse.class))
+                .map(c -> {
+                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
+                    r.setStatus(c.getStatus().name());
+                    return r;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -119,7 +137,9 @@ public class WarrantyClaimService {
     public WarrantyClaimResponse getById(String id) {
         WarrantyClaim claim = warrantyClaimRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WarrantyClaim not found: " + id));
-        return modelMapper.map(claim, WarrantyClaimResponse.class);
+        WarrantyClaimResponse response = modelMapper.map(claim, WarrantyClaimResponse.class);
+        response.setStatus(claim.getStatus().name());
+        return response;
     }
 
     /**
@@ -128,7 +148,11 @@ public class WarrantyClaimService {
     public List<WarrantyClaimResponse> getByClaimDate(LocalDate date) {
         return warrantyClaimRepository.findAll().stream()
                 .filter(c -> c.getClaimDate().equals(date))
-                .map(c -> modelMapper.map(c, WarrantyClaimResponse.class))
+                .map(c -> {
+                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
+                    r.setStatus(c.getStatus().name());
+                    return r;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -138,7 +162,11 @@ public class WarrantyClaimService {
     public List<WarrantyClaimResponse> getByStatus(String status) {
         return warrantyClaimRepository.findAll().stream()
                 .filter(c -> c.getStatus().name().equalsIgnoreCase(status))
-                .map(c -> modelMapper.map(c, WarrantyClaimResponse.class))
+                .map(c -> {
+                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
+                    r.setStatus(c.getStatus().name());
+                    return r;
+                })
                 .collect(Collectors.toList());
     }
 }

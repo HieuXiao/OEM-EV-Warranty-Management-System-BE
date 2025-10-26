@@ -1,5 +1,6 @@
 package com.mega.warrantymanagementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class WarrantyFile {
     // Liên kết đến bảng warranty_claim
     @ManyToOne
     @JoinColumn(name = "claim_id", nullable = false)
+    @JsonIgnore
     private WarrantyClaim warrantyClaim;
 
     // Lưu danh sách các URL ảnh

@@ -7,5 +7,5 @@ import java.util.List;
 public class WarrantyFileResponse {
     private String fileId;
     private List<String> imageUrl;
-    private WarrantyClaimResponse warrantyClaim;
+    private String claimId;
 }
