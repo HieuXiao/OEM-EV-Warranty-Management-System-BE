@@ -1,10 +1,16 @@
 package com.mega.warrantymanagementsystem.service;
 
+import com.mega.warrantymanagementsystem.entity.Campaign;
+import com.mega.warrantymanagementsystem.entity.Customer;
 import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.VehicleRequest;
+import com.mega.warrantymanagementsystem.model.response.CampaignResponse;
+import com.mega.warrantymanagementsystem.model.response.CustomerResponse;
 import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
+import com.mega.warrantymanagementsystem.repository.CampaignRepository;
+import com.mega.warrantymanagementsystem.repository.CustomerRepository;
 import com.mega.warrantymanagementsystem.repository.VehicleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service xử lý logic cho Vehicle.
- * Bao gồm CRUD và tìm kiếm theo vin, plate, type, color, model.
+ * Service xử lý logic cho Vehicle:
+ * - CRUD đầy đủ
+ * - Cho phép gắn Campaign và Customer thủ công bằng ID
+ * - Map trả về CampaignResponse, CustomerResponse đầy đủ
  */
 @Service
 public class VehicleService {
@@ -24,19 +32,24 @@ public class VehicleService {
     private VehicleRepository vehicleRepository;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private CampaignRepository campaignRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     /**
-     * Tạo mới Vehicle.
+     * -------------------- CREATE --------------------
      */
-    // Tạo mới Vehicle
     public VehicleResponse create(VehicleRequest request) {
-        // Kiểm tra trùng VIN
+        // Kiểm tra VIN trùng
         if (vehicleRepository.existsById(request.getVin())) {
             throw new DuplicateResourceException("VIN đã tồn tại: " + request.getVin());
         }
 
-        // Kiểm tra trùng plate (đảm bảo không NPE)
+        // Kiểm tra biển số trùng
         boolean plateExists = vehicleRepository.findAll().stream()
                 .anyMatch(v -> v.getPlate() != null && v.getPlate().equalsIgnoreCase(request.getPlate()));
         if (plateExists) {
@@ -44,15 +57,33 @@ public class VehicleService {
         }
 
         Vehicle vehicle = modelMapper.map(request, Vehicle.class);
+
+        // Gắn Customer nếu có
+        if (request.getCustomerId() != null) {
+            Customer customer = customerRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Customer với ID: " + request.getCustomerId()));
+            vehicle.setCustomer(customer);
+        }
+
+        // Gắn Campaign nếu có
+        if (request.getCampaignId() != null) {
+            Campaign campaign = campaignRepository.findById(request.getCampaignId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Campaign với ID: " + request.getCampaignId()));
+            vehicle.setCampaign(campaign);
+        }
+
         Vehicle saved = vehicleRepository.save(vehicle);
-        return modelMapper.map(saved, VehicleResponse.class);
+        return mapToResponse(saved);
     }
 
-    // Cập nhật Vehicle
+    /**
+     * -------------------- UPDATE --------------------
+     */
     public VehicleResponse update(String vin, VehicleRequest request) {
         Vehicle existing = vehicleRepository.findById(vin)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Vehicle với VIN: " + vin));
 
+        // Kiểm tra biển số có bị trùng không
         if (request.getPlate() != null &&
                 !request.getPlate().equalsIgnoreCase(existing.getPlate())) {
 
@@ -68,13 +99,26 @@ public class VehicleService {
         existing.setColor(request.getColor());
         existing.setModel(request.getModel());
 
+        // Gắn lại Customer nếu có
+        if (request.getCustomerId() != null) {
+            Customer customer = customerRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Customer với ID: " + request.getCustomerId()));
+            existing.setCustomer(customer);
+        }
+
+        // Gắn lại Campaign nếu có
+        if (request.getCampaignId() != null) {
+            Campaign campaign = campaignRepository.findById(request.getCampaignId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Campaign với ID: " + request.getCampaignId()));
+            existing.setCampaign(campaign);
+        }
+
         Vehicle updated = vehicleRepository.save(existing);
-        return modelMapper.map(updated, VehicleResponse.class);
+        return mapToResponse(updated);
     }
 
-
     /**
-     * Xóa Vehicle theo VIN.
+     * -------------------- DELETE --------------------
      */
     public void delete(String vin) {
         if (!vehicleRepository.existsById(vin)) {
@@ -84,60 +128,68 @@ public class VehicleService {
     }
 
     /**
-     * Lấy tất cả Vehicle.
+     * -------------------- GET ALL --------------------
      */
     public List<VehicleResponse> getAll() {
         return vehicleRepository.findAll().stream()
-                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Lấy Vehicle theo VIN.
+     * -------------------- GET BY VIN --------------------
      */
     public VehicleResponse getByVin(String vin) {
         Vehicle vehicle = vehicleRepository.findById(vin)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Vehicle với VIN: " + vin));
-        return modelMapper.map(vehicle, VehicleResponse.class);
+        return mapToResponse(vehicle);
     }
 
     /**
-     * Tìm theo biển số (plate).
+     * -------------------- FILTER --------------------
      */
     public List<VehicleResponse> getByPlate(String plate) {
         return vehicleRepository.findAll().stream()
-                .filter(v -> v.getPlate() != null && v.getPlate().toLowerCase().contains(plate.toLowerCase()))
-                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .filter(v -> v.getPlate() != null && v.getPlate().equalsIgnoreCase(plate))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Tìm theo loại xe (type).
-     */
     public List<VehicleResponse> getByType(String type) {
         return vehicleRepository.findAll().stream()
-                .filter(v -> v.getType() != null && v.getType().toLowerCase().contains(type.toLowerCase()))
-                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .filter(v -> v.getType() != null && v.getType().equalsIgnoreCase(type))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Tìm theo màu (color).
-     */
     public List<VehicleResponse> getByColor(String color) {
         return vehicleRepository.findAll().stream()
-                .filter(v -> v.getColor() != null && v.getColor().toLowerCase().contains(color.toLowerCase()))
-                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .filter(v -> v.getColor() != null && v.getColor().equalsIgnoreCase(color))
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<VehicleResponse> getByModel(String model) {
+        return vehicleRepository.findAll().stream()
+                .filter(v -> v.getModel() != null && v.getModel().equalsIgnoreCase(model))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Tìm theo model xe.
+     * -------------------- MAP ENTITY → RESPONSE --------------------
      */
-    public List<VehicleResponse> getByModel(String model) {
-        return vehicleRepository.findAll().stream()
-                .filter(v -> v.getModel() != null && v.getModel().toLowerCase().contains(model.toLowerCase()))
-                .map(v -> modelMapper.map(v, VehicleResponse.class))
-                .collect(Collectors.toList());
+    private VehicleResponse mapToResponse(Vehicle vehicle) {
+        VehicleResponse response = modelMapper.map(vehicle, VehicleResponse.class);
+
+        if (vehicle.getCustomer() != null) {
+            response.setCustomer(modelMapper.map(vehicle.getCustomer(), CustomerResponse.class));
+        }
+
+        if (vehicle.getCampaign() != null) {
+            response.setCampaign(modelMapper.map(vehicle.getCampaign(), CampaignResponse.class));
+        }
+
+        return response;
     }
 }

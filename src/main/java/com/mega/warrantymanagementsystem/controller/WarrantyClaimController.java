@@ -3,6 +3,7 @@ package com.mega.warrantymanagementsystem.controller;
 import com.mega.warrantymanagementsystem.model.request.WarrantyClaimRequest;
 import com.mega.warrantymanagementsystem.model.response.WarrantyClaimResponse;
 import com.mega.warrantymanagementsystem.service.WarrantyClaimService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/warranty-claims")
 @CrossOrigin
+@SecurityRequirement(name = "api")
 public class WarrantyClaimController {
 
     @Autowired

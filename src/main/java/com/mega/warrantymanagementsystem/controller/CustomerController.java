@@ -4,6 +4,7 @@ import com.mega.warrantymanagementsystem.entity.Customer;
 import com.mega.warrantymanagementsystem.model.request.CustomerRequest;
 import com.mega.warrantymanagementsystem.model.response.CustomerResponse;
 import com.mega.warrantymanagementsystem.service.CustomerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/customers")
+@CrossOrigin//cho phép mọi nguồn truy cập
+@SecurityRequirement(name = "api")
 public class CustomerController {
 
     @Autowired
