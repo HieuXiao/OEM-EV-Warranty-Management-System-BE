@@ -66,4 +66,12 @@ public class AccountController {
 //        return ResponseEntity.ok(accountService.getCurrentAccount());
 //    }
 
+    @PostMapping("/assign-service-center/{accountId}/{centerId}")
+    public ResponseEntity<String> assignServiceCenterToAccount(
+            @PathVariable String accountId,
+            @PathVariable int centerId) {
+
+        String message = accountService.assignServiceCenterToAccount(accountId, centerId);
+        return ResponseEntity.ok(message);
+    }
 }

@@ -229,7 +229,38 @@ public class AccountService implements UserDetailsService {
 
 
 
+    public String assignServiceCenterToAccount(String accountId, int serviceCenterId) {
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if (accountOpt.isEmpty()) {
+            return "account not found";
+        }
+        Account account = accountOpt.get();
 
+        String prefix = account.getAccountId().toUpperCase();
+        if (!prefix.startsWith("SS") && !prefix.startsWith("ST")) {
+            return "only SC Staff or SC Technician can be assigned a service center";
+        }
+
+        Optional<ServiceCenter> centerOpt = serviceCenterRepository.findById(serviceCenterId);
+        if (centerOpt.isEmpty()) {
+            return "service center not found";
+        }
+        ServiceCenter center = centerOpt.get();
+
+        // check nếu account đã có service center
+        if (account.getServiceCenter() != null) {
+            if (account.getServiceCenter().getCenterId() == serviceCenterId) {
+                return "account already assigned to this service center";
+            } else {
+                return "account already assigned to another service center";
+            }
+        }
+
+        account.setServiceCenter(center);
+        accountRepository.save(account);
+
+        return "service center assigned to account successfully";
+    }
     //cơ chế
     //B1: lấy username người dùng nhập
     //B2: tìm trong DB xem có account nào trùng với username đó không (LoadUserByUsername)
