@@ -1,7 +1,9 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Customer;
+import com.mega.warrantymanagementsystem.entity.ServiceCenter;
 import com.mega.warrantymanagementsystem.repository.CustomerRepository;
+import com.mega.warrantymanagementsystem.repository.ServiceCenterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private ServiceCenterRepository serviceCenterRepository;
 
     public List<Customer> getAll() {
         return customerRepository.findAll();
@@ -48,4 +53,29 @@ public class CustomerService {
         }
         customerRepository.deleteById(id);
     }
+
+    public String assignServiceCenter(int customerId, int serviceCenterId) {
+        Optional<Customer> customerOpt = customerRepository.findById(customerId);
+        if (customerOpt.isEmpty()) {
+            return "customer not found";
+        }
+
+        Customer customer = customerOpt.get(); // lấy ra object Customer
+
+        if (customer.getServiceCenter() != null && customer.getServiceCenter().getCenterId() == serviceCenterId) {
+            return "customer already assigned to this service center";
+        }
+
+
+        Optional<ServiceCenter> scOpt = serviceCenterRepository.findById(serviceCenterId);
+        if (scOpt.isEmpty()) {
+            return "service center not found";
+        }
+
+        customer.setServiceCenter(scOpt.get());
+        customerRepository.save(customer);
+
+        return "assign success";
+    }
+
 }
