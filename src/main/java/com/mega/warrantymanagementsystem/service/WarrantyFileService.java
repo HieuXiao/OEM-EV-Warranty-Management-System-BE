@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 import com.mega.warrantymanagementsystem.entity.WarrantyFile;
+import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.WarrantyFileRequest;
 import com.mega.warrantymanagementsystem.model.response.WarrantyFileResponse;
@@ -117,7 +118,21 @@ public class WarrantyFileService {
         req.setFileId(fileId);
         req.setClaimId(claimId);
         req.setMediaUrls(urls);
-        return create(req);
+
+        // Tạo file như bình thường
+        WarrantyFileResponse response = create(req);
+
+        // Sau khi thêm file, cập nhật trạng thái claim
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim với ID: " + claimId));
+
+        if (claim.getStatus() == WarrantyClaimStatus.CHECK) {
+            claim.setStatus(WarrantyClaimStatus.DECIDE);
+            warrantyClaimRepository.save(claim);
+        }
+
+        return response;
+
     }
 
 
