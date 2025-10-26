@@ -29,6 +29,11 @@ public class ServiceCenterService {
      * Tạo mới Service Center.
      */
     public ServiceCenterResponse create(ServiceCenterRequest request) {
+        boolean exists = serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName());
+        if (exists) {
+            throw new RuntimeException("Service Center name already exists: " + request.getCenterName());
+        }
+
         ServiceCenter center = modelMapper.map(request, ServiceCenter.class);
         ServiceCenter saved = serviceCenterRepository.save(center);
         return modelMapper.map(saved, ServiceCenterResponse.class);
@@ -40,6 +45,12 @@ public class ServiceCenterService {
     public ServiceCenterResponse update(Integer id, ServiceCenterRequest request) {
         ServiceCenter existing = serviceCenterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service Center không tồn tại với ID: " + id));
+
+        // kiểm tra trùng nếu tên mới khác tên cũ
+        if (!existing.getCenterName().equalsIgnoreCase(request.getCenterName())
+                && serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName())) {
+            throw new RuntimeException("Service Center name already exists: " + request.getCenterName());
+        }
 
         existing.setCenterName(request.getCenterName());
         existing.setLocation(request.getLocation());

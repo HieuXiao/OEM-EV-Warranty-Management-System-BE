@@ -28,7 +28,13 @@ public class PartUnderWarrantyService {
 
     // CREATE
     public PartUnderWarrantyResponse createPart(PartUnderWarrantyRequest request) {
+        // kiểm tra trùng serial
+        if (partRepo.existsById(request.getPartSerial())) {
+            throw new RuntimeException("Part serial already exists: " + request.getPartSerial());
+        }
+
         PartUnderWarranty part = modelMapper.map(request, PartUnderWarranty.class);
+
         Account admin = accountRepo.findById(request.getAdminId().toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Admin not found: " + request.getAdminId()));
         part.setAdmin(admin);
@@ -36,7 +42,6 @@ public class PartUnderWarrantyService {
         PartUnderWarranty saved = partRepo.save(part);
         return mapToResponse(saved);
     }
-
     // READ ALL
     public List<PartUnderWarrantyResponse> getAllParts() {
         return partRepo.findAll().stream()

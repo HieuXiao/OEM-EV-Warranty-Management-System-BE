@@ -26,6 +26,13 @@ public class WarehouseService {
     private ModelMapper modelMapper;
 
     public WarehouseResponse create(WarehouseRequest request) {
+        boolean exists = warehouseRepository.findAll().stream()
+                .anyMatch(w -> w.getName() != null && w.getName().equalsIgnoreCase(request.getName())
+                        && w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()));
+        if (exists) {
+            throw new RuntimeException("Warehouse with same name and location already exists");
+        }
+
         Warehouse warehouse = modelMapper.map(request, Warehouse.class);
         Warehouse saved = warehouseRepository.save(warehouse);
         return modelMapper.map(saved, WarehouseResponse.class);
@@ -35,18 +42,19 @@ public class WarehouseService {
         Warehouse existing = warehouseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse không tồn tại với ID: " + id));
 
+        boolean exists = warehouseRepository.findAll().stream()
+                .anyMatch(w -> w.getWhId() != id // bỏ qua bản thân
+                        && w.getName() != null && w.getName().equalsIgnoreCase(request.getName())
+                        && w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()));
+        if (exists) {
+            throw new RuntimeException("Another warehouse with same name and location already exists");
+        }
+
         existing.setName(request.getName());
         existing.setLocation(request.getLocation());
 
         Warehouse updated = warehouseRepository.save(existing);
         return modelMapper.map(updated, WarehouseResponse.class);
-    }
-
-    public void delete(Integer id) {
-        if (!warehouseRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Warehouse không tồn tại với ID: " + id);
-        }
-        warehouseRepository.deleteById(id);
     }
 
     public List<WarehouseResponse> getAll() {

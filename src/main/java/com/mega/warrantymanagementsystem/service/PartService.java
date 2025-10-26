@@ -59,6 +59,13 @@ public class PartService {
         if (part == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
 
+        if (request.getPartNumber() != null && !request.getPartNumber().equals(part.getPartNumber())) {
+            if (partRepository.existsByPartNumber(request.getPartNumber())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part number already exists: " + request.getPartNumber());
+            }
+            part.setPartNumber(request.getPartNumber());
+        }
+
         if (request.getNamePart() != null) part.setNamePart(request.getNamePart());
         part.setQuantity(request.getQuantity());
         part.setPrice(request.getPrice());

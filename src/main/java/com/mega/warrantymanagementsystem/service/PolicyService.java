@@ -30,12 +30,20 @@ public class PolicyService {
      * Tạo mới policy.
      */
     public PolicyResponse create(PolicyRequest request) {
+        // kiểm tra trùng tên policy trước khi tạo
+        boolean exists = policyRepository.findAll().stream()
+                .anyMatch(p -> p.getPolicyName() != null && p.getPolicyName().equalsIgnoreCase(request.getPolicyName()));
+        if (exists) {
+            throw new RuntimeException("Policy name already exists: " + request.getPolicyName());
+        }
+
         // map phần cơ bản (không map partUnderWarranty vì phải set thực thể)
         Policy policy = new Policy();
         policy.setPolicyName(request.getPolicyName());
         policy.setAvailableYear(request.getAvailableYear());
         policy.setKilometer(request.getKilometer());
         policy.setIsEnable(request.getIsEnable() != null ? request.getIsEnable() : Boolean.TRUE);
+
 
         // nếu client gửi partSerial thì phải lấy PartUnderWarranty từ DB
         if (request.getPartSerial() != null && !request.getPartSerial().isBlank()) {
@@ -56,9 +64,21 @@ public class PolicyService {
      */
     public PolicyResponse update(Integer id, PolicyRequest request) {
         Policy existing = policyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Policy không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Policy does not exist: " + id));
 
-        if (request.getPolicyName() != null) existing.setPolicyName(request.getPolicyName());
+        // check trùng tên policy nếu client gửi tên mới
+        if (request.getPolicyName() != null) {
+            boolean exists = policyRepository.findAll().stream()
+                    .anyMatch(p -> ! (p.getPolicyId() == id)
+
+                            && p.getPolicyName() != null
+                            && p.getPolicyName().equalsIgnoreCase(request.getPolicyName()));
+            if (exists) {
+                throw new RuntimeException("Policy name already exists: " + request.getPolicyName());
+            }
+            existing.setPolicyName(request.getPolicyName());
+        }
+
         if (request.getAvailableYear() != null) existing.setAvailableYear(request.getAvailableYear());
         if (request.getKilometer() != null) existing.setKilometer(request.getKilometer());
         if (request.getIsEnable() != null) existing.setIsEnable(request.getIsEnable());
@@ -83,7 +103,7 @@ public class PolicyService {
      */
     public PolicyResponse updateEnable(Integer id, Boolean isEnable) {
         Policy existing = policyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Policy không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Policy does not exist: " + id));
         existing.setIsEnable(isEnable);
         Policy updated = policyRepository.save(existing);
         return modelMapper.map(updated, PolicyResponse.class);
@@ -94,7 +114,7 @@ public class PolicyService {
      */
     public void delete(Integer id) {
         if (!policyRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Policy không tồn tại: " + id);
+            throw new ResourceNotFoundException("Policy does not exist: " + id);
         }
         policyRepository.deleteById(id);
     }
@@ -114,7 +134,7 @@ public class PolicyService {
      */
     public PolicyResponse getById(Integer id) {
         Policy policy = policyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Policy không tồn tại: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Policy does not exist: " + id));
         return modelMapper.map(policy, PolicyResponse.class);
     }
 
