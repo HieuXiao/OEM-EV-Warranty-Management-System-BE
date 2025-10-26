@@ -118,7 +118,6 @@ public class WarrantyFileService {
         req.setFileId(fileId);
         req.setClaimId(claimId);
         req.setMediaUrls(urls);
-
         // Tạo file như bình thường
         WarrantyFileResponse response = create(req);
 
@@ -132,8 +131,6 @@ public class WarrantyFileService {
         }
 
         return response;
-
     }
-
 
 }
