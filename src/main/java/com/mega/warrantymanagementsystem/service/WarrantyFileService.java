@@ -112,4 +112,13 @@ public class WarrantyFileService {
         return create(req);
     }
 
+    public WarrantyFileResponse createFromUrls(String fileId, String claimId, List<String> urls) {
+        WarrantyFileRequest req = new WarrantyFileRequest();
+        req.setFileId(fileId);
+        req.setClaimId(claimId);
+        req.setMediaUrls(urls);
+        return create(req);
+    }
+
+
 }
