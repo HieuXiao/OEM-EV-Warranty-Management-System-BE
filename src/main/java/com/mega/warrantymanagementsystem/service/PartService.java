@@ -31,21 +31,21 @@ public class PartService {
     }
 
     public PartResponse getPartBySerial(String partSerial) {
-        Part part = partRepository.findByPartSerial(partSerial);
+        Part part = partRepository.findByPartNumber(partSerial);
         if (part == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
         return toResponse(part);
     }
 
     public PartResponse createPart(PartRequest request) {
-        if (partRepository.existsByPartSerial(request.getPartSerial()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part already exists: " + request.getPartSerial());
+        if (partRepository.existsByPartSerial(request.getPartNumber()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part already exists: " + request.getPartNumber());
 
         Warehouse wh = warehouseRepository.findById(request.getWhId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse not found: " + request.getWhId()));
 
         Part part = new Part();
-        part.setPartSerial(request.getPartSerial());
+        part.setPartNumber(request.getPartNumber());
         part.setNamePart(request.getNamePart());
         part.setQuantity(request.getQuantity());
         part.setPrice(request.getPrice());
@@ -55,7 +55,7 @@ public class PartService {
     }
 
     public PartResponse updatePart(String partSerial, PartRequest request) {
-        Part part = partRepository.findByPartSerial(partSerial);
+        Part part = partRepository.findByPartNumber(partSerial);
         if (part == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
 
@@ -72,16 +72,16 @@ public class PartService {
         return toResponse(partRepository.save(part));
     }
 
-    public void deletePart(String partSerial) {
-        Part part = partRepository.findByPartSerial(partSerial);
+    public void deletePart(String partNumber) {
+        Part part = partRepository.findByPartNumber(partNumber);
         if (part == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partNumber);
         partRepository.delete(part);
     }
 
     private PartResponse toResponse(Part part) {
         PartResponse resp = new PartResponse();
-        resp.setPartSerial(part.getPartSerial());
+        resp.setPartNumber(part.getPartNumber());
         resp.setNamePart(part.getNamePart());
         resp.setQuantity(part.getQuantity());
         resp.setPrice(part.getPrice());

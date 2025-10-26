@@ -16,9 +16,9 @@ public class Part {
 
     //------------------Primary Key------------------------
     @Id
-    @Column(name = "part_serial", length = 20)
+    @Column(name = "part_number", length = 20)
     @NotEmpty(message = "Part serial cannot be empty!")
-    private String partSerial;
+    private String partNumber;
 
     //------------------Tên part------------------------
     @Column(name = "name_part", nullable = false, length = 100)

@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class PartRequest {
     @NotEmpty
-    private String partSerial;
+    private String partNumber;
 
     @NotEmpty
     private String namePart;

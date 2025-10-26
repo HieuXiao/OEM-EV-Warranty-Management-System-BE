@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PartResponse {
-    private String partSerial;
+    private String partNumber;
     private String namePart;
     private int quantity;
     private float price;

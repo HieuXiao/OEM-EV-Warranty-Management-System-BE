@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface PartRepository extends JpaRepository<Part, String> {
 
-    Part findByPartSerial(String partSerial);
+    Part findByPartNumber(String partNumber);
 
     List<Part> findByNamePart(String namePart);
 
