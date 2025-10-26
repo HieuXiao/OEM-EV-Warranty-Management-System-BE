@@ -9,8 +9,6 @@ public class WarrantyClaimRequest {
     private String vin;
     private String scStaffId;
     private String scTechnicianId;
-    private String evmId;
     private LocalDate claimDate;
     private String description;
-    private String evmDescription;
 }

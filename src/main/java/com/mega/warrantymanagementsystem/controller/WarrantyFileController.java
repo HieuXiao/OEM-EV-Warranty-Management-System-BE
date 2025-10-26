@@ -3,6 +3,7 @@ package com.mega.warrantymanagementsystem.controller;
 import com.mega.warrantymanagementsystem.model.request.WarrantyFileRequest;
 import com.mega.warrantymanagementsystem.model.response.WarrantyFileResponse;
 import com.mega.warrantymanagementsystem.service.WarrantyFileService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/warranty-files")
 @CrossOrigin
+@SecurityRequirement(name = "api")
 public class WarrantyFileController {
 
     @Autowired

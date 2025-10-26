@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class WarrantyClaimResponse {
-    private int claimId;
+    private String claimId;
     private LocalDate claimDate;
     private String status;
     private String description;

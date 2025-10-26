@@ -38,18 +38,21 @@ public class WarrantyClaimController {
     // DELETE
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {
+
         warrantyClaimService.delete(id);
     }
 
     // GET ALL
     @GetMapping
     public List<WarrantyClaimResponse> getAll() {
+
         return warrantyClaimService.getAll();
     }
 
     // GET BY ID
     @GetMapping("/{id}")
     public WarrantyClaimResponse getById(@PathVariable String id) {
+
         return warrantyClaimService.getById(id);
     }
 
