@@ -9,5 +9,5 @@ public class WarrantyFileRequest {
     @NotEmpty
     private String fileId;
     private String claimId;
-    private List<String> imageUrl;
+    private List<String> mediaUrls;
 }

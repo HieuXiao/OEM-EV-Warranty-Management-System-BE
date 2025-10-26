@@ -28,9 +28,10 @@ public class WarrantyFile {
     @JsonIgnore
     private WarrantyClaim warrantyClaim;
 
-    // Lưu danh sách các URL ảnh
+    // Lưu danh sách các URL ảnh,video
     @ElementCollection
-    @CollectionTable(name = "file_image")
-    @Column(name = "image_url")
-    private List<String> imageUrl = new ArrayList<>();
+    @CollectionTable(name = "file_media")
+    @Column(name = "media_url")
+    private List<String> mediaUrls = new ArrayList<>();
+
 }
