@@ -24,8 +24,12 @@ public class CampaignService {
 
     // CREATE
     public CampaignResponse create(CampaignRequest request) {
-        boolean exists = campaignRepository.findAll().stream()
-                .anyMatch(c -> c.getCampaignName().equalsIgnoreCase(request.getCampaignName()));
+        boolean exists = campaignRepository.existsByCampaignNameIgnoreCase(request.getCampaignName());
+
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+
         if (exists) {
             throw new DuplicateResourceException("Campaign name đã tồn tại: " + request.getCampaignName());
         }
@@ -40,13 +44,14 @@ public class CampaignService {
         Campaign existing = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Campaign với ID: " + campaignId));
 
-        // kiểm tra trùng tên
-        if (!existing.getCampaignName().equalsIgnoreCase(request.getCampaignName())) {
-            boolean exists = campaignRepository.findAll().stream()
-                    .anyMatch(c -> c.getCampaignName().equalsIgnoreCase(request.getCampaignName()));
-            if (exists) {
-                throw new DuplicateResourceException("Campaign name đã tồn tại: " + request.getCampaignName());
-            }
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+
+        // kiểm tra trùng nếu tên mới khác tên cũ
+        if (!existing.getCampaignName().equalsIgnoreCase(request.getCampaignName())
+                && campaignRepository.existsByCampaignNameIgnoreCase(request.getCampaignName())) {
+            throw new DuplicateResourceException("Campaign name đã tồn tại: " + request.getCampaignName());
         }
 
         existing.setCampaignName(request.getCampaignName());
@@ -83,10 +88,10 @@ public class CampaignService {
 
     // SEARCH BY NAME
     public List<CampaignResponse> searchByName(String name) {
-        return campaignRepository.findAll().stream()
-                .filter(c -> c.getCampaignName() != null &&
-                        c.getCampaignName().toLowerCase().contains(name.toLowerCase()))
+        return campaignRepository.findByCampaignNameContainingIgnoreCase(name)
+                .stream()
                 .map(c -> modelMapper.map(c, CampaignResponse.class))
                 .collect(Collectors.toList());
     }
+
 }

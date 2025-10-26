@@ -121,10 +121,24 @@ public class AccountService implements UserDetailsService {
         Account account = accountRepository.findById(accountId.toUpperCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
 
+        if (accountRepository.existsByUsername(updateRequest.getUsername())
+                && !updateRequest.getUsername().equals(account.getUsername())) {
+            throw new IllegalArgumentException("username already exists");
+        }
+        if (accountRepository.existsByEmail(updateRequest.getEmail())
+                && !updateRequest.getEmail().equals(account.getEmail())) {
+            throw new IllegalArgumentException("email already exists");
+        }
+        if (accountRepository.existsByPhone(updateRequest.getPhone())
+                && !updateRequest.getPhone().equals(account.getPhone())) {
+            throw new IllegalArgumentException("phone already exists");
+        }
+
         account.setUsername(updateRequest.getUsername());
         if (updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()) {
             account.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
         }
+
         account.setFullName(updateRequest.getFullName());
         account.setGender(updateRequest.getGender());
         account.setEmail(updateRequest.getEmail());
