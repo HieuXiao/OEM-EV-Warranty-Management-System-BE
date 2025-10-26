@@ -9,6 +9,6 @@ public class ClaimPartCheckResponse {
     private boolean isRepair;
     private String partSerial;
 
-    private WarrantyClaimResponse warrantyClaim;
+//    private WarrantyClaimResponse warrantyClaim;
     private VehicleResponse vehicle;
 }
