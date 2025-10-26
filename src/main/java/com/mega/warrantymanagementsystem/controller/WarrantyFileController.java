@@ -6,6 +6,7 @@ import com.mega.warrantymanagementsystem.service.WarrantyFileService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -70,5 +71,14 @@ public class WarrantyFileController {
     @GetMapping("/search/claim")
     public List<WarrantyFileResponse> getByClaimId(@RequestParam("value") String claimId) {
         return warrantyFileService.getByClaimId(claimId);
+    }
+
+    @PostMapping("/upload/save")
+    public WarrantyFileResponse uploadAndSave(
+            @RequestParam("fileId") String fileId,
+            @RequestParam("claimId") String claimId,
+            @RequestParam("files") List<MultipartFile> files) {
+
+        return warrantyFileService.uploadAndSave(fileId, claimId, files);
     }
 }

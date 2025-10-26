@@ -9,6 +9,7 @@ import com.mega.warrantymanagementsystem.repository.WarrantyClaimRepository;
 import com.mega.warrantymanagementsystem.repository.WarrantyFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,9 @@ public class WarrantyFileService {
     @Autowired
     private WarrantyClaimRepository warrantyClaimRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     // --- Tạo mới ---
     public WarrantyFileResponse create(WarrantyFileRequest request) {
         WarrantyClaim claim = warrantyClaimRepository.findById(request.getClaimId())
@@ -30,7 +34,7 @@ public class WarrantyFileService {
         WarrantyFile file = new WarrantyFile();
         file.setFileId(request.getFileId());
         file.setWarrantyClaim(claim);
-        file.setImageUrl(request.getImageUrl());
+        file.setMediaUrls(request.getMediaUrls());
 
         WarrantyFile saved = warrantyFileRepository.save(file);
 
@@ -48,7 +52,7 @@ public class WarrantyFileService {
             existing.setWarrantyClaim(claim);
         }
 
-        existing.setImageUrl(request.getImageUrl());
+        existing.setMediaUrls(request.getMediaUrls());
         WarrantyFile updated = warrantyFileRepository.save(existing);
         return toResponse(updated);
     }
@@ -89,8 +93,23 @@ public class WarrantyFileService {
     private WarrantyFileResponse toResponse(WarrantyFile file) {
         WarrantyFileResponse res = new WarrantyFileResponse();
         res.setFileId(file.getFileId());
-        res.setImageUrl(file.getImageUrl());
+        res.setMediaUrls(file.getMediaUrls());
         res.setClaimId(file.getWarrantyClaim() != null ? file.getWarrantyClaim().getClaimId() : null);
         return res;
     }
+
+    public WarrantyFileResponse uploadAndSave(String fileId, String claimId, List<MultipartFile> files) {
+        // Upload lên Cloudinary
+        List<String> urls = cloudinaryService.uploadFiles(files, "warranty_files");
+
+        // Tạo request object
+        WarrantyFileRequest req = new WarrantyFileRequest();
+        req.setFileId(fileId);
+        req.setClaimId(claimId);
+        req.setMediaUrls(urls);
+
+        // Lưu vào DB
+        return create(req);
+    }
+
 }
