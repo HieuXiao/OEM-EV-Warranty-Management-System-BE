@@ -230,7 +230,7 @@ public class AccountService implements UserDetailsService {
 
 
     public String assignServiceCenterToAccount(String accountId, int serviceCenterId) {
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        Optional<Account> accountOpt = accountRepository.findById(accountId.toUpperCase());
         if (accountOpt.isEmpty()) {
             return "account not found";
         }
