@@ -1,0 +1,102 @@
+package com.mega.warrantymanagementsystem.service.v2;
+
+import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
+import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
+import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
+import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
+import com.mega.warrantymanagementsystem.model.response.WarrantyClaimResponse;
+import com.mega.warrantymanagementsystem.repository.WarrantyClaimRepository;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * Xử lý các hành động của Technician, Staff, EVM trong luồng trạng thái claim.
+ */
+@Service
+public class ClaimWorkflowService {
+
+    @Autowired
+    private WarrantyClaimRepository warrantyClaimRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    /**
+     * Technician hoàn tất sửa chữa → chuyển REPAIR → HANDOVER
+     */
+    @Transactional
+    public WarrantyClaimResponse technicianToggleDone(String claimId, String technicianId, boolean done) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + claimId));
+
+        if (claim.getServiceCenterTechnician() == null ||
+                !claim.getServiceCenterTechnician().getAccountId().equalsIgnoreCase(technicianId)) {
+            throw new BusinessLogicException("Technician không có quyền thao tác claim này.");
+        }
+
+        if (claim.getStatus() != WarrantyClaimStatus.REPAIR) {
+            throw new BusinessLogicException("Technician chỉ có thể hoàn tất trong trạng thái REPAIR.");
+        }
+
+        claim.setTechnicianDone(done);
+        if (done) claim.setStatus(WarrantyClaimStatus.HANDOVER);
+
+        warrantyClaimRepository.save(claim);
+        return mapToResponse(claim);
+    }
+
+    /**
+     * Staff xác nhận bàn giao → chuyển HANDOVER → DONE
+     */
+    @Transactional
+    public WarrantyClaimResponse scStaffToggleDone(String claimId, String staffId, boolean done) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + claimId));
+
+        if (claim.getServiceCenterStaff() == null ||
+                !claim.getServiceCenterStaff().getAccountId().equalsIgnoreCase(staffId)) {
+            throw new BusinessLogicException("Staff không có quyền thao tác claim này.");
+        }
+
+        if (claim.getStatus() != WarrantyClaimStatus.HANDOVER) {
+            throw new BusinessLogicException("Staff chỉ có thể hoàn tất sau khi technician đã bàn giao (HANDOVER).");
+        }
+
+        claim.setScStaffDone(done);
+        if (done) claim.setStatus(WarrantyClaimStatus.DONE);
+
+        warrantyClaimRepository.save(claim);
+        return mapToResponse(claim);
+    }
+
+    /**
+     * EVM thêm mô tả trong khi claim đang REPAIR
+     */
+    @Transactional
+    public WarrantyClaimResponse updateEvmDescription(String claimId, String evmId, String description) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + claimId));
+
+        if (claim.getEvm() == null ||
+                !claim.getEvm().getAccountId().equalsIgnoreCase(evmId)) {
+            throw new BusinessLogicException("EVM không được phép chỉnh claim này.");
+        }
+
+        if (claim.getStatus() != WarrantyClaimStatus.REPAIR) {
+            throw new BusinessLogicException("Không thể thêm mô tả khi claim đã qua HANDOVER hoặc DONE.");
+        }
+
+        claim.setEvmDescription(description);
+        warrantyClaimRepository.save(claim);
+
+        return mapToResponse(claim);
+    }
+
+    private WarrantyClaimResponse mapToResponse(WarrantyClaim claim) {
+        WarrantyClaimResponse res = modelMapper.map(claim, WarrantyClaimResponse.class);
+        res.setStatus(claim.getStatus().name());
+        return res;
+    }
+}
