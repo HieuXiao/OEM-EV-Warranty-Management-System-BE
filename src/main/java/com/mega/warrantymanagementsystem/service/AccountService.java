@@ -78,8 +78,24 @@ public class AccountService implements UserDetailsService {
 
 
     public AccountResponse createAccount(AccountRequest accoutRequest) {
+        String accountId = accoutRequest.getAccountId().toUpperCase();
+
+        // kiểm tra trùng
+        if (accountRepository.existsByAccountId(accountId)) {
+            throw new IllegalArgumentException("account id already exists");
+        }
+        if (accountRepository.existsByUsername(accoutRequest.getUsername())) {
+            throw new IllegalArgumentException("username already exists");
+        }
+        if (accountRepository.existsByEmail(accoutRequest.getEmail())) {
+            throw new IllegalArgumentException("email already exists");
+        }
+        if (accountRepository.existsByPhone(accoutRequest.getPhone())) {
+            throw new IllegalArgumentException("phone already exists");
+        }
+
         Account account = modelMapper.map(accoutRequest, Account.class);
-        account.setAccountId(account.getAccountId().toUpperCase());
+        account.setAccountId(accountId);
         account.setPassword(passwordEncoder.encode(account.getPassword()));
 
         // xác định role theo prefix ID

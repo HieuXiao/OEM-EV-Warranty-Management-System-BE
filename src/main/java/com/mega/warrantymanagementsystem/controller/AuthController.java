@@ -8,6 +8,7 @@ import com.mega.warrantymanagementsystem.model.response.AccountResponse;
 import com.mega.warrantymanagementsystem.service.AccountService;
 import com.mega.warrantymanagementsystem.service.TokenService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +30,7 @@ public class AuthController {
 
     // ======================= REGISTER =======================
     @PostMapping("/register")
-    public ResponseEntity<AccountResponse> register(@RequestBody AccountRequest accoutRequest) {
+    public ResponseEntity<AccountResponse> register(@Valid @RequestBody AccountRequest accoutRequest) {
         // Kiểm tra trùng accountId
         try {
             accountService.findByAccountId(accoutRequest.getAccountId());

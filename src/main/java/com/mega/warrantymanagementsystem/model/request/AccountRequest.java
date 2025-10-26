@@ -1,9 +1,13 @@
 package com.mega.warrantymanagementsystem.model.request;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountRequest {
     @NotEmpty(message = "ID cannot be empty!")//không được để trống
     private String accountId;
