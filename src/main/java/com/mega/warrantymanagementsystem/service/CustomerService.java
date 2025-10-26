@@ -39,6 +39,14 @@ public class CustomerService {
 
     public Customer update(int id, Customer customer) {
         return customerRepository.findById(id).map(existing -> {
+            // check email trùng với customer khác
+            if (customerRepository.existsByCustomerEmailAndCustomerIdNot(customer.getCustomerEmail(), id)) {
+                throw new RuntimeException("Email already exists");
+            }
+            // check phone trùng với customer khác
+            if (customerRepository.existsByCustomerPhoneAndCustomerIdNot(customer.getCustomerPhone(), id)) {
+                throw new RuntimeException("Phone already exists");
+            }
             existing.setCustomerName(customer.getCustomerName());
             existing.setCustomerPhone(customer.getCustomerPhone());
             existing.setCustomerEmail(customer.getCustomerEmail());
