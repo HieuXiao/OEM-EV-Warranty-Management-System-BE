@@ -64,6 +64,9 @@ public class WarrantyClaim {
     @Column(name = "sc_staff_done", nullable = false)
     private boolean scStaffDone = false;
 
+    @Column(name = "is_repair", nullable = false, columnDefinition = "boolean default true")
+    private Boolean isRepair = true;
+
     // ------------------ Quan hệ với ClaimPartCheck ------------------
     @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
     @JsonIgnore
