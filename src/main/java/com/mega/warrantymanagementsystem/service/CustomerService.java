@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Customer;
 import com.mega.warrantymanagementsystem.entity.ServiceCenter;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.repository.CustomerRepository;
 import com.mega.warrantymanagementsystem.repository.ServiceCenterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,10 @@ public class CustomerService {
 
     public Customer create(Customer customer) {
         if (customerRepository.existsByCustomerEmail(customer.getCustomerEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
         if (customerRepository.existsByCustomerPhone(customer.getCustomerPhone())) {
-            throw new RuntimeException("Phone already exists");
+            throw new DuplicateResourceException("Phone already exists");
         }
         return customerRepository.save(customer);
     }
@@ -41,11 +42,11 @@ public class CustomerService {
         return customerRepository.findById(id).map(existing -> {
             // check email trùng với customer khác
             if (customerRepository.existsByCustomerEmailAndCustomerIdNot(customer.getCustomerEmail(), id)) {
-                throw new RuntimeException("Email already exists");
+                throw new DuplicateResourceException("Email already exists");
             }
             // check phone trùng với customer khác
             if (customerRepository.existsByCustomerPhoneAndCustomerIdNot(customer.getCustomerPhone(), id)) {
-                throw new RuntimeException("Phone already exists");
+                throw new DuplicateResourceException("Phone already exists");
             }
             existing.setCustomerName(customer.getCustomerName());
             existing.setCustomerPhone(customer.getCustomerPhone());

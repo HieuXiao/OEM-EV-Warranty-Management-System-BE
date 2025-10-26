@@ -32,8 +32,7 @@ public class WarehouseService {
                         || (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation())));
 
         if (exists) {
-            System.out.println("Warehouse name or location already exists");
-            return null; // hoặc tùy xử lý khác
+            throw new DuplicateResourceException("Warehouse name or location already exists");
         }
 
         Warehouse warehouse = modelMapper.map(request, Warehouse.class);
@@ -51,8 +50,7 @@ public class WarehouseService {
                                 (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()))));
 
         if (exists) {
-            System.out.println("Another warehouse has same name or location");
-            return null; // hoặc tùy xử lý khác
+            throw new DuplicateResourceException("Warehouse name or location already exists");
         }
 
         existing.setName(request.getName());
