@@ -32,10 +32,14 @@ public class ClaimPartCheckService {
     @Autowired
     private ModelMapper modelMapper;
 
-    // Tạo mới ClaimPartCheck
+    // CREATE
     public ClaimPartCheckResponse create(ClaimPartCheckRequest request) {
         if (claimPartCheckRepository.existsById(request.getPartNumber())) {
             throw new DuplicateResourceException("PartNumber đã tồn tại: " + request.getPartNumber());
+        }
+
+        if (claimPartCheckRepository.existsByPartSerial(request.getPartSerial())) {
+            throw new DuplicateResourceException("PartSerial đã tồn tại: " + request.getPartSerial());
         }
 
         WarrantyClaim warrantyClaim = warrantyClaimRepository.findById(request.getWarrantyId())
@@ -56,10 +60,17 @@ public class ClaimPartCheckService {
         return modelMapper.map(saved, ClaimPartCheckResponse.class);
     }
 
-    // Cập nhật ClaimPartCheck
+    // UPDATE
     public ClaimPartCheckResponse update(String partNumber, ClaimPartCheckRequest request) {
         ClaimPartCheck existing = claimPartCheckRepository.findById(partNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ClaimPartCheck: " + partNumber));
+
+        // check trùng partSerial nếu đổi sang serial khác
+        if (request.getPartSerial() != null &&
+                !request.getPartSerial().equals(existing.getPartSerial()) &&
+                claimPartCheckRepository.existsByPartSerial(request.getPartSerial())) {
+            throw new DuplicateResourceException("PartSerial đã tồn tại: " + request.getPartSerial());
+        }
 
         if (request.getWarrantyId() != null) {
             WarrantyClaim warrantyClaim = warrantyClaimRepository.findById(request.getWarrantyId())
@@ -81,7 +92,7 @@ public class ClaimPartCheckService {
         return modelMapper.map(updated, ClaimPartCheckResponse.class);
     }
 
-    // Xóa ClaimPartCheck
+    // DELETE
     public void delete(String partNumber) {
         if (!claimPartCheckRepository.existsById(partNumber)) {
             throw new ResourceNotFoundException("Không tìm thấy ClaimPartCheck: " + partNumber);
@@ -89,21 +100,21 @@ public class ClaimPartCheckService {
         claimPartCheckRepository.deleteById(partNumber);
     }
 
-    // Lấy tất cả
+    // GET ALL
     public List<ClaimPartCheckResponse> getAll() {
         return claimPartCheckRepository.findAll().stream()
                 .map(c -> modelMapper.map(c, ClaimPartCheckResponse.class))
                 .collect(Collectors.toList());
     }
 
-    // Lấy theo PartNumber
+    // GET BY PartNumber
     public ClaimPartCheckResponse getByPartNumber(String partNumber) {
         ClaimPartCheck claimPartCheck = claimPartCheckRepository.findById(partNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ClaimPartCheck: " + partNumber));
         return modelMapper.map(claimPartCheck, ClaimPartCheckResponse.class);
     }
 
-    // Tìm theo VIN
+    // GET BY VIN
     public List<ClaimPartCheckResponse> getByVin(String vin) {
         return claimPartCheckRepository.findAll().stream()
                 .filter(c -> c.getVehicle() != null && vin.equals(c.getVehicle().getVin()))
@@ -111,7 +122,7 @@ public class ClaimPartCheckService {
                 .collect(Collectors.toList());
     }
 
-    // Tìm theo WarrantyId
+    // GET BY WarrantyId
     public List<ClaimPartCheckResponse> getByWarrantyId(String warrantyId) {
         return claimPartCheckRepository.findAll().stream()
                 .filter(c -> c.getWarrantyClaim() != null && warrantyId.equals(c.getWarrantyClaim().getClaimId()))
