@@ -57,6 +57,13 @@ public class WarehouseService {
         return modelMapper.map(updated, WarehouseResponse.class);
     }
 
+    public void delete(Integer id) {
+        if (!warehouseRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Warehouse does not exist: " + id);
+        }
+        warehouseRepository.deleteById(id);
+    }
+
     public List<WarehouseResponse> getAll() {
         return warehouseRepository.findAll().stream()
                 .map(w -> modelMapper.map(w, WarehouseResponse.class))
