@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "warranty_claim")
+@Table(name = "warranty_clai")
 @AllArgsConstructor
 @NoArgsConstructor
 public class WarrantyClaim {
