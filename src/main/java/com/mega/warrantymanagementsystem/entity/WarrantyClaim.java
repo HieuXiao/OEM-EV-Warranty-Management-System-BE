@@ -68,7 +68,7 @@ public class WarrantyClaim {
     private Boolean isRepair = true;
 
     // ------------------ Quan hệ với ClaimPartCheck ------------------
-    @OneToMany(mappedBy = "warrantyClaim", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "warrantyClaim", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ClaimPartCheck> claimPartChecks = new ArrayList<>();
 

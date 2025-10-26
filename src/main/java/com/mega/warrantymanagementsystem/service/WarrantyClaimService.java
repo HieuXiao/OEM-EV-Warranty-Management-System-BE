@@ -4,7 +4,7 @@ import com.mega.warrantymanagementsystem.entity.*;
 import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.WarrantyClaimRequest;
-import com.mega.warrantymanagementsystem.model.response.WarrantyClaimResponse;
+import com.mega.warrantymanagementsystem.model.response.*;
 import com.mega.warrantymanagementsystem.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +66,7 @@ public class WarrantyClaimService {
         }
 
         WarrantyClaim saved = warrantyClaimRepository.save(claim);
-        WarrantyClaimResponse response = modelMapper.map(saved, WarrantyClaimResponse.class);
-        response.setStatus(saved.getStatus().name());
-        return response;
+        return mapToResponse(saved);
     }
 
     /**
@@ -103,9 +101,7 @@ public class WarrantyClaimService {
         }
 
         WarrantyClaim updated = warrantyClaimRepository.save(existing);
-        WarrantyClaimResponse response = modelMapper.map(updated, WarrantyClaimResponse.class);
-        response.setStatus(updated.getStatus().name());
-        return response;
+        return mapToResponse(updated);
     }
 
     /**
@@ -119,15 +115,11 @@ public class WarrantyClaimService {
     }
 
     /**
-     * Lấy tất cả claims
+     * Lấy tất cả claims (đã fix vòng lặp JSON)
      */
     public List<WarrantyClaimResponse> getAll() {
         return warrantyClaimRepository.findAll().stream()
-                .map(c -> {
-                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
-                    r.setStatus(c.getStatus().name());
-                    return r;
-                })
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -137,9 +129,7 @@ public class WarrantyClaimService {
     public WarrantyClaimResponse getById(String id) {
         WarrantyClaim claim = warrantyClaimRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("WarrantyClaim not found: " + id));
-        WarrantyClaimResponse response = modelMapper.map(claim, WarrantyClaimResponse.class);
-        response.setStatus(claim.getStatus().name());
-        return response;
+        return mapToResponse(claim);
     }
 
     /**
@@ -148,11 +138,7 @@ public class WarrantyClaimService {
     public List<WarrantyClaimResponse> getByClaimDate(LocalDate date) {
         return warrantyClaimRepository.findAll().stream()
                 .filter(c -> c.getClaimDate().equals(date))
-                .map(c -> {
-                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
-                    r.setStatus(c.getStatus().name());
-                    return r;
-                })
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -162,11 +148,51 @@ public class WarrantyClaimService {
     public List<WarrantyClaimResponse> getByStatus(String status) {
         return warrantyClaimRepository.findAll().stream()
                 .filter(c -> c.getStatus().name().equalsIgnoreCase(status))
-                .map(c -> {
-                    WarrantyClaimResponse r = modelMapper.map(c, WarrantyClaimResponse.class);
-                    r.setStatus(c.getStatus().name());
-                    return r;
-                })
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Hàm map entity sang response, cắt vòng lặp và chỉ lấy thông tin cần thiết
+     */
+    private WarrantyClaimResponse mapToResponse(WarrantyClaim claim) {
+        WarrantyClaimResponse r = modelMapper.map(claim, WarrantyClaimResponse.class);
+        r.setStatus(claim.getStatus().name());
+
+        // Map vehicle
+        if (claim.getVehicle() != null) {
+            r.setVehicle(modelMapper.map(claim.getVehicle(), VehicleResponse.class));
+        }
+
+        // Map accounts (staff, tech, evm)
+        if (claim.getServiceCenterStaff() != null) {
+            r.setServiceCenterStaff(modelMapper.map(claim.getServiceCenterStaff(), AccountResponse.class));
+        }
+        if (claim.getServiceCenterTechnician() != null) {
+            r.setServiceCenterTechnician(modelMapper.map(claim.getServiceCenterTechnician(), AccountResponse.class));
+        }
+        if (claim.getEvm() != null) {
+            r.setEvm(modelMapper.map(claim.getEvm(), AccountResponse.class));
+        }
+
+        // Map claimPartChecks
+        if (claim.getClaimPartChecks() != null) {
+            r.setClaimPartChecks(
+                    claim.getClaimPartChecks().stream()
+                            .map(p -> modelMapper.map(p, ClaimPartCheckResponse.class))
+                            .collect(Collectors.toList())
+            );
+        }
+
+        // Map warrantyFiles
+        if (claim.getWarrantyFiles() != null) {
+            r.setWarrantyFiles(
+                    claim.getWarrantyFiles().stream()
+                            .map(f -> modelMapper.map(f, WarrantyFileResponse.class))
+                            .collect(Collectors.toList())
+            );
+        }
+
+        return r;
     }
 }
