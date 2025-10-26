@@ -51,4 +51,5 @@ public class CampaignController {
     public List<CampaignResponse> searchCampaignByName(@RequestParam("value") String name) {
         return campaignService.searchByName(name);
     }
+
 }

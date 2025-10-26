@@ -98,9 +98,28 @@ public class VehicleController {
     /**
      * Lấy danh sách Vehicle theo customerId.
      */
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/search/{customerId}")
     public List<VehicleResponse> getByCustomerId(@PathVariable int customerId) {
         return vehicleService.getByCustomerId(customerId);
     }
 
+    /**
+     * api xóa campaign khỏi vehicle
+     * POST /api/vehicle-campaign/remove
+     * body: {"vin": "VIN123...", "campaignId": 1}
+     */
+    @PostMapping("/remove")
+    public String removeCampaign(@RequestParam String vin, @RequestParam int campaignId) {
+        return vehicleService.removeCampaignFromVehicle(vin, campaignId);
+    }
+
+    /**
+     * api gắn campaign vào vehicle
+     * POST /api/vehicle-campaign/assign
+     * body: {"vin": "VIN123...", "campaignId": 1}
+     */
+    @PostMapping("/assign")
+    public String assignCampaign(@RequestParam String vin, @RequestParam int campaignId) {
+        return vehicleService.assignCampaignToVehicle(vin, campaignId);
+    }
 }

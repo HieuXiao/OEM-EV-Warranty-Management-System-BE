@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -202,6 +203,62 @@ public class VehicleService {
                         && v.getCustomer().getCustomerId() == customerId)
                 .map(v -> modelMapper.map(v, VehicleResponse.class))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * xóa campaign khỏi vehicle
+     * @param vin vin của vehicle
+     * @param campaignId id của campaign muốn xóa
+     * @return thông báo thành công hoặc lỗi
+     */
+    public String removeCampaignFromVehicle(String vin, int campaignId) {
+        Optional<Vehicle> vehicleOpt = vehicleRepository.findById(vin);
+        if (vehicleOpt.isEmpty()) {
+            return "vehicle not found";
+        }
+        Vehicle vehicle = vehicleOpt.get();
+
+        Campaign campaign = vehicle.getCampaign();
+        if (campaign == null || campaign.getCampaignId() != campaignId) {
+            return "vehicle is not associated with this campaign";
+        }
+
+        // xóa campaign
+        vehicle.setCampaign(null);
+        vehicleRepository.save(vehicle);
+        return "campaign removed from vehicle successfully";
+    }
+
+    /**
+     * gắn campaign vào vehicle
+     * @param vin vin của vehicle
+     * @param campaignId id của campaign muốn gắn
+     * @return thông báo thành công hoặc lỗi
+     */
+    public String assignCampaignToVehicle(String vin, int campaignId) {
+        Optional<Vehicle> vehicleOpt = vehicleRepository.findById(vin);
+        if (vehicleOpt.isEmpty()) {
+            return "vehicle not found";
+        }
+        Vehicle vehicle = vehicleOpt.get();
+
+        Optional<Campaign> campaignOpt = campaignRepository.findById(campaignId);
+        if (campaignOpt.isEmpty()) {
+            return "campaign not found";
+        }
+        Campaign campaign = campaignOpt.get();
+
+        // kiểm tra model trùng
+        if(campaign.getModel() == null ||
+                campaign.getModel().stream().noneMatch(m -> m.equalsIgnoreCase(vehicle.getModel()))) {
+            throw new RuntimeException("vehicle model does not match campaign model");
+        }
+
+
+        // gắn campaign vào vehicle
+        vehicle.setCampaign(campaign);
+        vehicleRepository.save(vehicle);
+        return "campaign assigned to vehicle successfully";
     }
 
 }
