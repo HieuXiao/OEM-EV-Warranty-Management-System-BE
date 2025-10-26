@@ -38,7 +38,7 @@ public class PartService {
     }
 
     public PartResponse createPart(PartRequest request) {
-        if (partRepository.existsByPartSerial(request.getPartNumber()))
+        if (partRepository.existsByPartNumber(request.getPartNumber()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part already exists: " + request.getPartNumber());
 
         Warehouse wh = warehouseRepository.findById(request.getWhId())

@@ -16,6 +16,6 @@ public interface PartRepository extends JpaRepository<Part, String> {
 
     List<Part> findByWarehouse(Warehouse warehouse);
 
-    boolean existsByPartSerial(String partSerial);
+    boolean existsByPartNumber(String partNumber);
 }
 
