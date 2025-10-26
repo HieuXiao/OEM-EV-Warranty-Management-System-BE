@@ -23,7 +23,7 @@ public class ClaimWorkflowController {
     private ClaimWorkflowService claimWorkflowService;
 
     /**
-     * ✅ Technician hoàn tất sửa chữa → chuyển từ REPAIR → HANDOVER
+     * Technician hoàn tất sửa chữa → chuyển từ REPAIR → HANDOVER
      */
     @PostMapping("/{claimId}/technician/done")
     public ResponseEntity<WarrantyClaimResponse> technicianDone(
@@ -34,7 +34,7 @@ public class ClaimWorkflowController {
     }
 
     /**
-     * ✅ Staff xác nhận bàn giao → chuyển từ HANDOVER → DONE
+     * Staff xác nhận bàn giao → chuyển từ HANDOVER → DONE
      */
     @PostMapping("/{claimId}/staff/done")
     public ResponseEntity<WarrantyClaimResponse> staffDone(
@@ -45,7 +45,7 @@ public class ClaimWorkflowController {
     }
 
     /**
-     * 🧩 EVM thêm mô tả (chỉ khi claim còn ở REPAIR)
+     * EVM thêm mô tả (chỉ khi claim còn ở REPAIR)
      */
     @PostMapping("/{claimId}/evm/description")
     public ResponseEntity<WarrantyClaimResponse> updateEvmDescription(
@@ -54,4 +54,15 @@ public class ClaimWorkflowController {
             @RequestParam String description) {
         return ResponseEntity.ok(claimWorkflowService.updateEvmDescription(claimId, evmId, description));
     }
+
+    /**
+     * Technician bỏ qua sửa chữa → CHECK → HANDOVER (isRepair=false)
+     */
+    @PostMapping("/{claimId}/technician/skip-repair")
+    public ResponseEntity<WarrantyClaimResponse> skipRepair(
+            @PathVariable String claimId,
+            @RequestParam String technicianId) {
+        return ResponseEntity.ok(claimWorkflowService.technicianSkipRepair(claimId, technicianId));
+    }
+
 }

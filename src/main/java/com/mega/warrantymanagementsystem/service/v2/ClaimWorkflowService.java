@@ -94,6 +94,31 @@ public class ClaimWorkflowService {
         return mapToResponse(claim);
     }
 
+    @Transactional
+    public WarrantyClaimResponse technicianSkipRepair(String claimId, String technicianId) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + claimId));
+
+        // Xác minh technician có quyền
+        if (claim.getServiceCenterTechnician() == null ||
+                !claim.getServiceCenterTechnician().getAccountId().equalsIgnoreCase(technicianId)) {
+            throw new BusinessLogicException("Technician không có quyền thao tác claim này.");
+        }
+
+        // Chỉ cho phép khi đang CHECK
+        if (claim.getStatus() != WarrantyClaimStatus.CHECK) {
+            throw new BusinessLogicException("Chỉ có thể bỏ qua sửa chữa khi claim đang ở trạng thái CHECK.");
+        }
+
+        // Đặt lại trạng thái
+        claim.setIsRepair(false);
+        claim.setStatus(WarrantyClaimStatus.HANDOVER);
+        claim.setTechnicianDone(true); // Đánh dấu đã xử lý xong
+        warrantyClaimRepository.save(claim);
+
+        return mapToResponse(claim);
+    }
+
     private WarrantyClaimResponse mapToResponse(WarrantyClaim claim) {
         WarrantyClaimResponse res = modelMapper.map(claim, WarrantyClaimResponse.class);
         res.setStatus(claim.getStatus().name());

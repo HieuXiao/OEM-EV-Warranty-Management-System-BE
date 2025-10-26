@@ -13,6 +13,7 @@ public class WarrantyClaimResponse {
     private String evmDescription;
     private boolean technicianDone;
     private boolean scStaffDone;
+    private Boolean isRepair ;
 
     private VehicleResponse vehicle;
     private AccountResponse serviceCenterStaff;
