@@ -3,6 +3,7 @@ package com.mega.warrantymanagementsystem.controller;
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import com.mega.warrantymanagementsystem.model.response.CampaignResponse;
 import com.mega.warrantymanagementsystem.service.CampaignService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/campaigns")
 @CrossOrigin
+@SecurityRequirement(name = "api")
 public class CampaignController {
 
     @Autowired
