@@ -18,8 +18,6 @@ public interface WarrantyClaimRepository extends JpaRepository<WarrantyClaim, St
 
     List<WarrantyClaim> findByEvm_AccountId(String accountId);
 
-    List<WarrantyClaim> findByPolicy_PolicyId(int policyId);
-
     List<WarrantyClaim> findByClaimDate(LocalDate claimDate);
 
     List<WarrantyClaim> findByStatus(WarrantyClaimStatus status);
