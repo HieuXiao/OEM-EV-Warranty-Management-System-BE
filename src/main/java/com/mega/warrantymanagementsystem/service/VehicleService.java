@@ -140,4 +140,16 @@ public class VehicleService {
                 .map(v -> modelMapper.map(v, VehicleResponse.class))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Lấy danh sách Vehicle theo customerId.
+     */
+    public List<VehicleResponse> getByCustomerId(int customerId) {
+        return vehicleRepository.findAll().stream()
+                .filter(v -> v.getCustomer() != null
+                        && v.getCustomer().getCustomerId() == customerId)
+                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .collect(Collectors.toList());
+    }
+
 }

@@ -92,4 +92,13 @@ public class VehicleController {
     public List<VehicleResponse> getByModel(@RequestParam("value") String model) {
         return vehicleService.getByModel(model);
     }
+
+    /**
+     * Lấy danh sách Vehicle theo customerId.
+     */
+    @GetMapping("/customer/{customerId}")
+    public List<VehicleResponse> getByCustomerId(@PathVariable int customerId) {
+        return vehicleService.getByCustomerId(customerId);
+    }
+
 }
