@@ -1,5 +1,7 @@
 package com.mega.warrantymanagementsystem.config;
 
+import com.mega.warrantymanagementsystem.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,46 +9,50 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Cấu hình bảo mật cho phép truy cập toàn bộ endpoint mà không cần login.
- * Dùng cho giai đoạn phát triển (dev/test).
- */
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    Filter filter;
+
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();// mã hóa password
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authenticationConfiguration) throws Exception {
+
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // Tắt CSRF để test qua Swagger/Postman dễ hơn
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        req -> req
+                                .requestMatchers("/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
 
-                // Cho phép tất cả request (Swagger, API...) không cần login
-                .authorizeHttpRequests(req -> req
-                        .requestMatchers("/**").permitAll()
-                        .anyRequest().authenticated()
                 )
-
-                // Không tạo session, stateless mode
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // Không cần filter xác thực JWT ở đây
-        return http.build();
+                .userDetailsService(userDetailsService)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+        // thêm filter vào trước UsernamePasswordAuthenticationFilter
     }
+
 }
-
-
-

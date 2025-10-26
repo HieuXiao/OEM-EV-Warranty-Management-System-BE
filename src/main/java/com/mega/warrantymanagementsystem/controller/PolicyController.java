@@ -3,6 +3,7 @@ package com.mega.warrantymanagementsystem.controller;
 import com.mega.warrantymanagementsystem.model.request.PolicyRequest;
 import com.mega.warrantymanagementsystem.model.response.PolicyResponse;
 import com.mega.warrantymanagementsystem.service.PolicyService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/policies")
 @CrossOrigin
+@SecurityRequirement(name = "api")
 public class PolicyController {
 
     @Autowired

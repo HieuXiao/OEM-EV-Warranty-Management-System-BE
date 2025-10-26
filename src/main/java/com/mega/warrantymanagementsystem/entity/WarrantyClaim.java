@@ -41,11 +41,6 @@ public class WarrantyClaim {
     @JoinColumn(name = "evm_id", referencedColumnName = "accountId")
     private Account evm;
 
-    // ------------------ Quan hệ với Policy ------------------
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id", nullable = false)
-    private Policy policy;
-
     // ------------------ Ngày yêu cầu ------------------
     @Column(name = "claim_date", nullable = false)
     private LocalDate claimDate;

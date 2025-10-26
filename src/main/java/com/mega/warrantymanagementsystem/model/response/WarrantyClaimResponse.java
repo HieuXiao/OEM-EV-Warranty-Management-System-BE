@@ -18,7 +18,6 @@ public class WarrantyClaimResponse {
     private AccountResponse serviceCenterStaff;
     private AccountResponse serviceCenterTechnician;
     private AccountResponse evm;
-    private PolicyResponse policy;
     private List<ClaimPartCheckResponse> claimPartChecks;
     private List<WarrantyFileResponse> warrantyFiles;
 }

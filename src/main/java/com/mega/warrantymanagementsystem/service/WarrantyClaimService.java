@@ -30,9 +30,6 @@ public class WarrantyClaimService {
     private VehicleRepository vehicleRepository;
 
     @Autowired
-    private PolicyRepository policyRepository;
-
-    @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
@@ -55,9 +52,6 @@ public class WarrantyClaimService {
         // Map quan hệ
         claim.setVehicle(vehicleRepository.findById(request.getVin())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin())));
-
-        claim.setPolicy(policyRepository.findById(request.getPolicyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Policy not found: " + request.getPolicyId())));
 
         if (request.getScStaffId() != null) {
             claim.setServiceCenterStaff(accountRepository.findById(request.getScStaffId())
@@ -90,10 +84,6 @@ public class WarrantyClaimService {
         existing.setEvmDescription(request.getEvmDescription());
 
         // Quan hệ có thể thay đổi (nếu cần)
-        if (request.getPolicyId() != null) {
-            existing.setPolicy(policyRepository.findById(request.getPolicyId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Policy not found: " + request.getPolicyId())));
-        }
 
         if (request.getVin() != null) {
             existing.setVehicle(vehicleRepository.findById(request.getVin())

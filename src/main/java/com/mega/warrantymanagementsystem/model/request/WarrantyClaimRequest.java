@@ -10,7 +10,6 @@ public class WarrantyClaimRequest {
     private String scStaffId;
     private String scTechnicianId;
     private String evmId;
-    private Integer policyId;
     private LocalDate claimDate;
     private String description;
     private String evmDescription;

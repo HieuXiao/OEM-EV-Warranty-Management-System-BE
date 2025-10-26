@@ -3,6 +3,7 @@ package com.mega.warrantymanagementsystem.controller;
 import com.mega.warrantymanagementsystem.model.request.ClaimPartCheckRequest;
 import com.mega.warrantymanagementsystem.model.response.ClaimPartCheckResponse;
 import com.mega.warrantymanagementsystem.service.ClaimPartCheckService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/claim-part-check")
+@CrossOrigin//cho phép mọi nguồn truy cập
+@SecurityRequirement(name = "api")
 public class ClaimPartCheckController {
 
     @Autowired
