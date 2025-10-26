@@ -68,4 +68,20 @@ public class CustomerController {
         // nếu muốn, có thể map vehicles sang VehicleResponse, hoặc bỏ nếu không cần
         return response;
     }
+
+    @PostMapping("/{customerId}/assign-service-center/{serviceCenterId}")
+    public ResponseEntity<String> assignServiceCenter(
+            @PathVariable int customerId,
+            @PathVariable int serviceCenterId) {
+
+        String result = customerService.assignServiceCenter(customerId, serviceCenterId);
+
+        if ("customer not found".equals(result) || "service center not found".equals(result)) {
+            return ResponseEntity.status(404).body(result);
+        } else if ("customer already assigned to this service center".equals(result)) {
+            return ResponseEntity.status(400).body(result);
+        }
+
+        return ResponseEntity.ok(result);
+    }
 }

@@ -14,4 +14,7 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, Integer> {
 
     // Tìm danh sách warehouse theo location
     List<Warehouse> findByLocation(String location);
+
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByLocationIgnoreCase(String location);
 }

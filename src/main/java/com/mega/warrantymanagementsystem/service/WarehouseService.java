@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Warehouse;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.WarehouseRequest;
 import com.mega.warrantymanagementsystem.model.response.WarehouseResponse;
@@ -27,10 +28,12 @@ public class WarehouseService {
 
     public WarehouseResponse create(WarehouseRequest request) {
         boolean exists = warehouseRepository.findAll().stream()
-                .anyMatch(w -> w.getName() != null && w.getName().equalsIgnoreCase(request.getName())
-                        && w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()));
+                .anyMatch(w -> (w.getName() != null && w.getName().equalsIgnoreCase(request.getName()))
+                        || (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation())));
+
         if (exists) {
-            throw new RuntimeException("Warehouse with same name and location already exists");
+            System.out.println("Warehouse name or location already exists");
+            return null; // hoặc tùy xử lý khác
         }
 
         Warehouse warehouse = modelMapper.map(request, Warehouse.class);
@@ -43,11 +46,13 @@ public class WarehouseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse không tồn tại với ID: " + id));
 
         boolean exists = warehouseRepository.findAll().stream()
-                .anyMatch(w -> w.getWhId() != id // bỏ qua bản thân
-                        && w.getName() != null && w.getName().equalsIgnoreCase(request.getName())
-                        && w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()));
+                .anyMatch(w -> w.getWhId() != id &&
+                        ((w.getName() != null && w.getName().equalsIgnoreCase(request.getName())) ||
+                                (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()))));
+
         if (exists) {
-            throw new RuntimeException("Another warehouse with same name and location already exists");
+            System.out.println("Another warehouse has same name or location");
+            return null; // hoặc tùy xử lý khác
         }
 
         existing.setName(request.getName());
