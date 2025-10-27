@@ -15,6 +15,6 @@ public class CustomerResponse {
     private String customerPhone;
     private String customerEmail;
     private String customerAddress;
-    private CustomerResponse customerResponse;
+    private ServiceCenterResponse serviceCenter;
 //    private List<VehicleResponse> vehicles;
 }
