@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PartUnderWarrantyResponse {
-    private String partSerial;
+    private String partNumber;
     private String partName;
     private String partBrand;
     private Float price;

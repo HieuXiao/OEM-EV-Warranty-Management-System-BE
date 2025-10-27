@@ -17,5 +17,5 @@ public class PolicyRequest {
 
     private Boolean isEnable;
 
-    private String partSerial; // ID của PartUnderWarranty
+    private String partNumber; // ID của PartUnderWarranty
 }

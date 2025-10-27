@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PartUnderWarrantyRequest {
-    private String partSerial;
+    private String partNumber;
     private String adminId;
     private String partName;
     private String partBrand;
