@@ -16,8 +16,8 @@ public class PartUnderWarranty {
 
     //------------------Primary Key------------------------
     @Id
-    @Column(name = "part_serial", length = 20)
-    private String partSerial;
+    @Column(name = "part_id", length = 20)
+    private String partId;
 
     //------------------Liên kết Account (Admin quản lý part)------------------------
     @ManyToOne(fetch = FetchType.LAZY)

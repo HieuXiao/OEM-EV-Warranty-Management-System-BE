@@ -29,9 +29,9 @@ public class PartUnderWarrantyService {
 
     // CREATE
     public PartUnderWarrantyResponse createPart(PartUnderWarrantyRequest request) {
-        // kiểm tra trùng serial
-        if (partRepo.existsById(request.getPartSerial())) {
-            throw new DuplicateResourceException("Part serial already exists: " + request.getPartSerial());
+        // kiểm tra trùng id
+        if (partRepo.existsById(request.getPartId())) {
+            throw new DuplicateResourceException("Part ID already exists: " + request.getPartId());
         }
 
         PartUnderWarranty part = modelMapper.map(request, PartUnderWarranty.class);
@@ -43,6 +43,7 @@ public class PartUnderWarrantyService {
         PartUnderWarranty saved = partRepo.save(part);
         return mapToResponse(saved);
     }
+
     // READ ALL
     public List<PartUnderWarrantyResponse> getAllParts() {
         return partRepo.findAll().stream()
@@ -50,17 +51,17 @@ public class PartUnderWarrantyService {
                 .collect(Collectors.toList());
     }
 
-    // READ BY SERIAL
-    public PartUnderWarrantyResponse getPartBySerial(String serial) {
-        PartUnderWarranty part = partRepo.findById(serial)
-                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + serial));
+    // READ BY ID
+    public PartUnderWarrantyResponse getPartById(String partId) {
+        PartUnderWarranty part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
         return mapToResponse(part);
     }
 
     // UPDATE
-    public PartUnderWarrantyResponse updatePart(String serial, PartUnderWarrantyRequest request) {
-        PartUnderWarranty part = partRepo.findById(serial)
-                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + serial));
+    public PartUnderWarrantyResponse updatePart(String partId, PartUnderWarrantyRequest request) {
+        PartUnderWarranty part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
 
         part.setPartName(request.getPartName());
         part.setPartBrand(request.getPartBrand());
@@ -79,9 +80,9 @@ public class PartUnderWarrantyService {
     }
 
     // DELETE
-    public void deletePart(String serial) {
-        PartUnderWarranty part = partRepo.findById(serial)
-                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + serial));
+    public void deletePart(String partId) {
+        PartUnderWarranty part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
         partRepo.delete(part);
     }
 

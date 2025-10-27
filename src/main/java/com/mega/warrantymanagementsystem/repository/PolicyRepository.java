@@ -10,6 +10,6 @@ import java.util.List;
 public interface PolicyRepository extends JpaRepository<Policy, Integer> {
     Policy findByPolicyName(String policyName);
     List<Policy> findByIsEnable(Boolean isEnable);
-    List<Policy> findByPartUnderWarranty_PartSerial(String partSerial);
+    List<Policy> findByPartUnderWarranty_PartId(String partId);
 
 }

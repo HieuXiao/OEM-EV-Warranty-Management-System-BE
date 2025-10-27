@@ -38,26 +38,22 @@ public class PolicyService {
             throw new DuplicateResourceException("Policy name already exists: " + request.getPolicyName());
         }
 
-        // map phần cơ bản (không map partUnderWarranty vì phải set thực thể)
+        // map phần cơ bản
         Policy policy = new Policy();
         policy.setPolicyName(request.getPolicyName());
         policy.setAvailableYear(request.getAvailableYear());
         policy.setKilometer(request.getKilometer());
         policy.setIsEnable(request.getIsEnable() != null ? request.getIsEnable() : Boolean.TRUE);
 
-
-        // nếu client gửi partSerial thì phải lấy PartUnderWarranty từ DB
-        if (request.getPartSerial() != null && !request.getPartSerial().isBlank()) {
-            PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartSerial())
-                    .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartSerial()));
+        // nếu client gửi partId thì phải lấy PartUnderWarranty từ DB
+        if (request.getPartId() != null && !request.getPartId().isBlank()) {
+            PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartId())
+                    .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartId()));
             policy.setPartUnderWarranty(part);
         }
 
         Policy saved = policyRepository.save(policy);
-
-        // map sang response và trả
-        PolicyResponse resp = modelMapper.map(saved, PolicyResponse.class);
-        return resp;
+        return modelMapper.map(saved, PolicyResponse.class);
     }
 
     /**
@@ -70,8 +66,7 @@ public class PolicyService {
         // check trùng tên policy nếu client gửi tên mới
         if (request.getPolicyName() != null) {
             boolean exists = policyRepository.findAll().stream()
-                    .anyMatch(p -> ! (p.getPolicyId() == id)
-
+                    .anyMatch(p -> p.getPolicyId() != id
                             && p.getPolicyName() != null
                             && p.getPolicyName().equalsIgnoreCase(request.getPolicyName()));
             if (exists) {
@@ -84,13 +79,13 @@ public class PolicyService {
         if (request.getKilometer() != null) existing.setKilometer(request.getKilometer());
         if (request.getIsEnable() != null) existing.setIsEnable(request.getIsEnable());
 
-        // xử lý partSerial nếu có
-        if (request.getPartSerial() != null) {
-            if (request.getPartSerial().isBlank()) {
+        // xử lý partId nếu có
+        if (request.getPartId() != null) {
+            if (request.getPartId().isBlank()) {
                 existing.setPartUnderWarranty(null); // clear association
             } else {
-                PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartSerial())
-                        .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartSerial()));
+                PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartId())
+                        .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartId()));
                 existing.setPartUnderWarranty(part);
             }
         }

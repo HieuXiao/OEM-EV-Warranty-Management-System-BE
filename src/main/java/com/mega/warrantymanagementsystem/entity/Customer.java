@@ -46,9 +46,10 @@ public class Customer {
     @NotEmpty(message = "Address cannot be empty!")
     private String customerAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "center_id") // Khóa ngoại trỏ tới bảng service_center
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "center_id")
     private ServiceCenter serviceCenter;
+
 
 
 //    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)

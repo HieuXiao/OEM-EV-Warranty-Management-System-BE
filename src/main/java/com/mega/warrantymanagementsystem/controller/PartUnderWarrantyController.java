@@ -28,14 +28,14 @@ public class PartUnderWarrantyController {
         return partService.getAllParts();
     }
 
-    @GetMapping("/{serial}")
-    public PartUnderWarrantyResponse getPart(@PathVariable String serial) {
-        return partService.getPartBySerial(serial);
+    @GetMapping("/{id}")
+    public PartUnderWarrantyResponse getPart(@PathVariable String id) {
+        return partService.getPartById(id);
     }
 
-    @PutMapping("/{serial}")
-    public PartUnderWarrantyResponse updatePart(@PathVariable String serial, @RequestBody PartUnderWarrantyRequest request) {
-        return partService.updatePart(serial, request);
+    @PutMapping("/{id}")
+    public PartUnderWarrantyResponse updatePart(@PathVariable String id, @RequestBody PartUnderWarrantyRequest request) {
+        return partService.updatePart(id, request);
     }
 
     @DeleteMapping("/{serial}")
