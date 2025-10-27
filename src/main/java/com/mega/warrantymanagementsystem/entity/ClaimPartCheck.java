@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,7 +32,7 @@ public class ClaimPartCheck {
     private int quantity;
 
     @Column(name = "is_repair", nullable = false)
-    private boolean isRepair;
+    private Boolean isRepair;
 
     @Column(name = "part_serial", length = 33)
     private String partSerial; // optional, unique identifier

@@ -6,7 +6,7 @@ import lombok.Data;
 public class ClaimPartCheckResponse {
     private String partNumber;
     private int quantity;
-    private boolean isRepair;
+    private Boolean isRepair;
     private String partSerial;
 
 //    private WarrantyClaimResponse warrantyClaim;

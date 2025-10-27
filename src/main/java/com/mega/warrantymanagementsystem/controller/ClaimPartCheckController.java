@@ -12,60 +12,70 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/claim-part-check")
-@CrossOrigin//cho phép mọi nguồn truy cập
+@CrossOrigin
 @SecurityRequirement(name = "api")
 public class ClaimPartCheckController {
 
     @Autowired
     private ClaimPartCheckService claimPartCheckService;
 
-    // ================= CREATE =================
+    // CREATE
     @PostMapping("/create")
     public ResponseEntity<ClaimPartCheckResponse> create(@RequestBody ClaimPartCheckRequest request) {
         ClaimPartCheckResponse response = claimPartCheckService.create(request);
         return ResponseEntity.ok(response);
     }
 
-    // ================= UPDATE =================
-    @PutMapping("/update/{partNumber}")
-    public ResponseEntity<ClaimPartCheckResponse> update(@PathVariable String partNumber,
+    // UPDATE
+    @PutMapping("/update/{claimId}/{partNumber}")
+    public ResponseEntity<ClaimPartCheckResponse> update(@PathVariable String claimId,
+                                                         @PathVariable String partNumber,
                                                          @RequestBody ClaimPartCheckRequest request) {
-        ClaimPartCheckResponse response = claimPartCheckService.update(partNumber, request);
+        ClaimPartCheckResponse response = claimPartCheckService.update(claimId, partNumber, request);
         return ResponseEntity.ok(response);
     }
 
-    // ================= DELETE =================
-    @DeleteMapping("/delete/{partNumber}")
-    public ResponseEntity<String> delete(@PathVariable String partNumber) {
-        claimPartCheckService.delete(partNumber);
-        return ResponseEntity.ok("ClaimPartCheck với PartNumber " + partNumber + " đã được xóa thành công");
+    // ADD SERIAL
+    @PostMapping("/add-serial/{claimId}/{partNumber}")
+    public ResponseEntity<ClaimPartCheckResponse> addPartSerial(
+            @PathVariable String claimId,
+            @PathVariable String partNumber,
+            @RequestParam String partSerial) {
+        ClaimPartCheckResponse response = claimPartCheckService.addPartSerial(claimId, partNumber, partSerial);
+        return ResponseEntity.ok(response);
     }
 
-    // ================= GET ALL =================
+    // DELETE
+    @DeleteMapping("/delete/{claimId}/{partNumber}")
+    public ResponseEntity<String> delete(@PathVariable String claimId, @PathVariable String partNumber) {
+        claimPartCheckService.delete(claimId, partNumber);
+        return ResponseEntity.ok("Đã xóa part " + partNumber + " trong claim " + claimId + " thành công");
+    }
+
+    // GET ALL
     @GetMapping("/all")
     public ResponseEntity<List<ClaimPartCheckResponse>> getAll() {
-        List<ClaimPartCheckResponse> list = claimPartCheckService.getAll();
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(claimPartCheckService.getAll());
     }
 
-    // ================= GET BY PART NUMBER =================
-    @GetMapping("/get/{partNumber}")
-    public ResponseEntity<ClaimPartCheckResponse> getByPartNumber(@PathVariable String partNumber) {
-        ClaimPartCheckResponse response = claimPartCheckService.getByPartNumber(partNumber);
+    // GET BY CLAIM + PART
+    @GetMapping("/get/{claimId}/{partNumber}")
+    public ResponseEntity<ClaimPartCheckResponse> getByPartNumber(
+            @PathVariable String claimId,
+            @PathVariable String partNumber) {
+        ClaimPartCheckResponse response = claimPartCheckService.getByPartNumber(claimId, partNumber);
         return ResponseEntity.ok(response);
     }
 
-    // ================= SEARCH BY VIN =================
+    // SEARCH BY VIN
     @GetMapping("/search/vin/{vin}")
     public ResponseEntity<List<ClaimPartCheckResponse>> searchByVin(@PathVariable String vin) {
-        List<ClaimPartCheckResponse> list = claimPartCheckService.getByVin(vin);
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(claimPartCheckService.getByVin(vin));
     }
 
-    // ================= SEARCH BY WARRANTY ID =================
+    // SEARCH BY WARRANTY ID
     @GetMapping("/search/warranty/{warrantyId}")
     public ResponseEntity<List<ClaimPartCheckResponse>> searchByWarrantyId(@PathVariable String warrantyId) {
-        List<ClaimPartCheckResponse> list = claimPartCheckService.getByWarrantyId(warrantyId);
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(claimPartCheckService.getByWarrantyId(warrantyId));
     }
 }

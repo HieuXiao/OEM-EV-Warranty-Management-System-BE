@@ -22,7 +22,7 @@ public class ClaimPartCheckRequest {
     @NotNull(message = "quantity cannot be null")
     private Integer quantity;
 
-    private boolean isRepair;
+    private Boolean isRepair;
 
-    private String partSerial; // optional
+//    private String partSerial; // optional
 }
