@@ -3,6 +3,8 @@ package com.mega.warrantymanagementsystem.service;
 import com.mega.warrantymanagementsystem.entity.Customer;
 import com.mega.warrantymanagementsystem.entity.ServiceCenter;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
+import com.mega.warrantymanagementsystem.model.response.CustomerResponse;
+import com.mega.warrantymanagementsystem.model.response.ServiceCenterResponse;
 import com.mega.warrantymanagementsystem.repository.CustomerRepository;
 import com.mega.warrantymanagementsystem.repository.ServiceCenterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,11 @@ public class CustomerService {
     @Autowired
     private ServiceCenterRepository serviceCenterRepository;
 
-    public List<Customer> getAll() {
-        return customerRepository.findAll();
+    public List<CustomerResponse> getAll() {
+        return customerRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     public Optional<Customer> getById(int id) {
@@ -85,6 +90,28 @@ public class CustomerService {
         customerRepository.save(customer);
 
         return "assign success";
+    }
+
+    // Map Entity sang Response
+    private CustomerResponse mapToResponse(Customer customer) {
+        ServiceCenterResponse scRes = null;
+        if (customer.getServiceCenter() != null) {
+            ServiceCenter sc = customer.getServiceCenter();
+            scRes = new ServiceCenterResponse(
+                    sc.getCenterId(),
+                    sc.getCenterName(),
+                    sc.getLocation()
+            );
+        }
+
+        return new CustomerResponse(
+                customer.getCustomerId(),
+                customer.getCustomerName(),
+                customer.getCustomerPhone(),
+                customer.getCustomerEmail(),
+                customer.getCustomerAddress(),
+                scRes
+        );
     }
 
 }
