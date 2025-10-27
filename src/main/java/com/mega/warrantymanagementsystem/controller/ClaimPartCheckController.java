@@ -36,12 +36,12 @@ public class ClaimPartCheckController {
     }
 
     // ADD SERIAL
-    @PostMapping("/add-serial/{claimId}/{partNumber}")
-    public ResponseEntity<ClaimPartCheckResponse> addPartSerial(
+    @PostMapping("/add-serials/{claimId}/{partNumber}")
+    public ResponseEntity<ClaimPartCheckResponse> addPartSerials(
             @PathVariable String claimId,
             @PathVariable String partNumber,
-            @RequestParam String partSerial) {
-        ClaimPartCheckResponse response = claimPartCheckService.addPartSerial(claimId, partNumber, partSerial);
+            @RequestBody List<String> serialCodes) {
+        ClaimPartCheckResponse response = claimPartCheckService.addPartSerials(claimId, partNumber, serialCodes);
         return ResponseEntity.ok(response);
     }
 

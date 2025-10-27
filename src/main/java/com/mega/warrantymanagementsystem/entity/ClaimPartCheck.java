@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "claim_part_check")
 @Data
@@ -34,6 +36,6 @@ public class ClaimPartCheck {
     @Column(name = "is_repair", nullable = false)
     private Boolean isRepair;
 
-    @Column(name = "part_serial", length = 33)
-    private String partSerial; // optional, unique identifier
+    @OneToMany(mappedBy = "claimPartCheck", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClaimPartSerial> partSerials; // optional, unique identifier
 }

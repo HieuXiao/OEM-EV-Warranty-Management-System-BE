@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.ClaimPartCheck;
+import com.mega.warrantymanagementsystem.entity.ClaimPartSerial;
 import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
@@ -8,10 +9,11 @@ import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceEx
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.ClaimPartCheckRequest;
 import com.mega.warrantymanagementsystem.model.response.ClaimPartCheckResponse;
+import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
 import com.mega.warrantymanagementsystem.repository.ClaimPartCheckRepository;
 import com.mega.warrantymanagementsystem.repository.VehicleRepository;
 import com.mega.warrantymanagementsystem.repository.WarrantyClaimRepository;
-import org.modelmapper.ModelMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +31,6 @@ public class ClaimPartCheckService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
-
-    @Autowired
-    private ModelMapper modelMapper;
 
     // ================= CREATE =================
     public ClaimPartCheckResponse create(ClaimPartCheckRequest request) {
@@ -54,7 +53,7 @@ public class ClaimPartCheckService {
         claimPartCheck.setIsRepair(request.getIsRepair() != null ? request.getIsRepair() : false);
 
         ClaimPartCheck saved = claimPartCheckRepository.save(claimPartCheck);
-        return modelMapper.map(saved, ClaimPartCheckResponse.class);
+        return toResponse(saved);
     }
 
     // ================= UPDATE =================
@@ -74,33 +73,51 @@ public class ClaimPartCheckService {
         }
 
         ClaimPartCheck updated = claimPartCheckRepository.save(existing);
-        return modelMapper.map(updated, ClaimPartCheckResponse.class);
+        return toResponse(updated);
     }
 
-    // ================= ADD SERIAL =================
-    public ClaimPartCheckResponse addPartSerial(String claimId, String partNumber, String partSerial) {
+    // ================= ADD SERIALS =================
+    @Transactional
+    public ClaimPartCheckResponse addPartSerials(String claimId, String partNumber, List<String> serialCodes) {
         ClaimPartCheck existing = claimPartCheckRepository.findByPartNumberAndWarrantyClaim_ClaimId(partNumber, claimId);
         if (existing == null) {
-            throw new ResourceNotFoundException("Không tìm thấy partNumber " + partNumber +
-                    " trong claim " + claimId);
-        }
-
-        WarrantyClaim claim = existing.getWarrantyClaim();
-        if (claim == null) {
-            throw new ResourceNotFoundException("Claim liên kết không tồn tại");
-        }
-
-        if (claim.getStatus() == null || !claim.getStatus().name().equalsIgnoreCase("REPAIR")) {
-            throw new BusinessLogicException("Chỉ được thêm partSerial khi claim đang ở trạng thái REPAIR.");
+            throw new ResourceNotFoundException("Không tìm thấy partNumber " + partNumber + " trong claim " + claimId);
         }
 
         if (existing.getIsRepair() == null || !existing.getIsRepair()) {
-            throw new BusinessLogicException("Không thể thêm partSerial cho bộ phận không được đánh dấu là cần sửa (isRepair=false).");
+            throw new BusinessLogicException("Bộ phận này không được đánh dấu là cần sửa (isRepair=false).");
         }
 
-        existing.setPartSerial(partSerial);
+        if (serialCodes == null || serialCodes.isEmpty()) {
+            throw new BusinessLogicException("Danh sách partSerial không được để trống.");
+        }
+
+        if (existing.getQuantity() != serialCodes.size()) {
+            throw new BusinessLogicException("Số lượng partSerial phải đúng bằng quantity (" + existing.getQuantity() + ").");
+        }
+
+        // kiểm tra trùng trong cùng claimPartCheck
+        List<String> currentCodes = existing.getPartSerials().stream()
+                .map(ClaimPartSerial::getSerialCode)
+                .toList();
+
+        for (String code : serialCodes) {
+            if (currentCodes.contains(code)) {
+                throw new DuplicateResourceException("PartSerial trùng trong cùng ClaimPartCheck: " + code);
+            }
+        }
+
+        // clear và thêm mới
+        existing.getPartSerials().clear();
+        for (String code : serialCodes) {
+            ClaimPartSerial serial = new ClaimPartSerial();
+            serial.setSerialCode(code);
+            serial.setClaimPartCheck(existing);
+            existing.getPartSerials().add(serial);
+        }
+
         ClaimPartCheck saved = claimPartCheckRepository.save(existing);
-        return modelMapper.map(saved, ClaimPartCheckResponse.class);
+        return toResponse(saved);
     }
 
     // ================= DELETE =================
@@ -116,7 +133,7 @@ public class ClaimPartCheckService {
     // ================= GET =================
     public List<ClaimPartCheckResponse> getAll() {
         return claimPartCheckRepository.findAll().stream()
-                .map(c -> modelMapper.map(c, ClaimPartCheckResponse.class))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -126,20 +143,43 @@ public class ClaimPartCheckService {
             throw new ResourceNotFoundException("Không tìm thấy partNumber " + partNumber +
                     " trong claim " + claimId);
         }
-        return modelMapper.map(claimPartCheck, ClaimPartCheckResponse.class);
+        return toResponse(claimPartCheck);
     }
 
     public List<ClaimPartCheckResponse> getByVin(String vin) {
         return claimPartCheckRepository.findAll().stream()
                 .filter(c -> c.getVehicle() != null && vin.equals(c.getVehicle().getVin()))
-                .map(c -> modelMapper.map(c, ClaimPartCheckResponse.class))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<ClaimPartCheckResponse> getByWarrantyId(String warrantyId) {
         return claimPartCheckRepository.findAll().stream()
                 .filter(c -> c.getWarrantyClaim() != null && warrantyId.equals(c.getWarrantyClaim().getClaimId()))
-                .map(c -> modelMapper.map(c, ClaimPartCheckResponse.class))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    // ================= PRIVATE MAPPER =================
+    private ClaimPartCheckResponse toResponse(ClaimPartCheck entity) {
+        ClaimPartCheckResponse res = new ClaimPartCheckResponse();
+        res.setPartNumber(entity.getPartNumber());
+        res.setQuantity(entity.getQuantity());
+        res.setIsRepair(entity.getIsRepair());
+
+        if (entity.getPartSerials() != null) {
+            res.setPartSerials(entity.getPartSerials().stream()
+                    .map(ClaimPartSerial::getSerialCode)
+                    .collect(Collectors.toList()));
+        }
+
+        if (entity.getVehicle() != null) {
+            VehicleResponse v = new VehicleResponse();
+            v.setVin(entity.getVehicle().getVin());
+            v.setModel(entity.getVehicle().getModel());
+            res.setVehicle(v);
+        }
+
+        return res;
     }
 }
