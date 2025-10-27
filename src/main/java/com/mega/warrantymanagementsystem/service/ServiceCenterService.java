@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.ServiceCenter;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.ServiceCenterRequest;
 import com.mega.warrantymanagementsystem.model.response.ServiceCenterResponse;
@@ -31,7 +32,7 @@ public class ServiceCenterService {
     public ServiceCenterResponse create(ServiceCenterRequest request) {
         boolean exists = serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName());
         if (exists) {
-            throw new RuntimeException("Service Center name already exists: " + request.getCenterName());
+            throw new DuplicateResourceException("Service Center name already exists: " + request.getCenterName());
         }
 
         ServiceCenter center = modelMapper.map(request, ServiceCenter.class);
@@ -49,7 +50,7 @@ public class ServiceCenterService {
         // kiểm tra trùng nếu tên mới khác tên cũ
         if (!existing.getCenterName().equalsIgnoreCase(request.getCenterName())
                 && serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName())) {
-            throw new RuntimeException("Service Center name already exists: " + request.getCenterName());
+            throw new DuplicateResourceException("Service Center name already exists: " + request.getCenterName());
         }
 
         existing.setCenterName(request.getCenterName());

@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.PartUnderWarranty;
 import com.mega.warrantymanagementsystem.entity.Policy;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.PolicyRequest;
 import com.mega.warrantymanagementsystem.model.response.PolicyResponse;
@@ -34,7 +35,7 @@ public class PolicyService {
         boolean exists = policyRepository.findAll().stream()
                 .anyMatch(p -> p.getPolicyName() != null && p.getPolicyName().equalsIgnoreCase(request.getPolicyName()));
         if (exists) {
-            throw new RuntimeException("Policy name already exists: " + request.getPolicyName());
+            throw new DuplicateResourceException("Policy name already exists: " + request.getPolicyName());
         }
 
         // map phần cơ bản (không map partUnderWarranty vì phải set thực thể)
@@ -74,7 +75,7 @@ public class PolicyService {
                             && p.getPolicyName() != null
                             && p.getPolicyName().equalsIgnoreCase(request.getPolicyName()));
             if (exists) {
-                throw new RuntimeException("Policy name already exists: " + request.getPolicyName());
+                throw new DuplicateResourceException("Policy name already exists: " + request.getPolicyName());
             }
             existing.setPolicyName(request.getPolicyName());
         }

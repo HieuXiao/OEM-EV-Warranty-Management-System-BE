@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Account;
 import com.mega.warrantymanagementsystem.entity.PartUnderWarranty;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.PartUnderWarrantyRequest;
 import com.mega.warrantymanagementsystem.model.response.PartUnderWarrantyResponse;
@@ -30,7 +31,7 @@ public class PartUnderWarrantyService {
     public PartUnderWarrantyResponse createPart(PartUnderWarrantyRequest request) {
         // kiểm tra trùng serial
         if (partRepo.existsById(request.getPartSerial())) {
-            throw new RuntimeException("Part serial already exists: " + request.getPartSerial());
+            throw new DuplicateResourceException("Part serial already exists: " + request.getPartSerial());
         }
 
         PartUnderWarranty part = modelMapper.map(request, PartUnderWarranty.class);
