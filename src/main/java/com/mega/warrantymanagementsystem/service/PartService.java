@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Part;
 import com.mega.warrantymanagementsystem.entity.Warehouse;
+import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.model.request.PartRequest;
 import com.mega.warrantymanagementsystem.model.response.PartResponse;
 import com.mega.warrantymanagementsystem.model.response.WarehouseResponse;
@@ -38,11 +39,12 @@ public class PartService {
     }
 
     public PartResponse createPart(PartRequest request) {
-        if (partRepository.existsByPartNumber(request.getPartNumber()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part already exists: " + request.getPartNumber());
+        if (partRepository.existsByPartNumber(request.getPartNumber())) {
+            throw new DuplicateResourceException("Part already exists: " + request.getPartNumber());
+        }
 
         Warehouse wh = warehouseRepository.findById(request.getWhId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse not found: " + request.getWhId()));
+                .orElseThrow(() -> new DuplicateResourceException("Warehouse not found: " + request.getWhId()));
 
         Part part = new Part();
         part.setPartNumber(request.getPartNumber());
