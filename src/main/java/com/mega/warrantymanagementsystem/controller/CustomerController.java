@@ -23,12 +23,17 @@ public class CustomerController {
 
     @GetMapping
     public List<CustomerResponse> getAll() {
-        return customerService.getAll().stream().map(this::toResponse).collect(Collectors.toList());
+        return customerService.getAll();
     }
 
     @GetMapping("/{id}")
     public CustomerResponse getById(@PathVariable int id) {
-        return customerService.getById(id).map(this::toResponse)
+        return customerService.getById(id)
+                .map(customer -> customerService.getAll()
+                        .stream()
+                        .filter(c -> c.getCustomerId() == id)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Customer not found")))
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
