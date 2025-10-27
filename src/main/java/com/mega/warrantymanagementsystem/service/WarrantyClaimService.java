@@ -31,6 +31,9 @@ public class WarrantyClaimService {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private CampaignRepository campaignRepository;
+
     /**
      * Tạo mới WarrantyClaim (status mặc định CHECK)
      */
@@ -40,30 +43,52 @@ public class WarrantyClaimService {
         claim.setClaimId(request.getClaimId());
         claim.setClaimDate(request.getClaimDate() != null ? request.getClaimDate() : LocalDate.now());
         claim.setDescription(request.getDescription());
-        claim.setStatus(WarrantyClaimStatus.CHECK); // Mặc định trạng thái khi tạo mới
+        claim.setStatus(WarrantyClaimStatus.CHECK);
 
-        // Vehicle
+        // --- Vehicle ---
         Vehicle vehicle = vehicleRepository.findById(request.getVin())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe với VIN: " + request.getVin()));
         claim.setVehicle(vehicle);
 
-        // SC Staff
+        // --- Staff & Technician ---
         if (request.getScStaffId() != null) {
             Account staff = accountRepository.findById(request.getScStaffId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy SC Staff: " + request.getScStaffId()));
             claim.setServiceCenterStaff(staff);
         }
 
-        // SC Technician
         if (request.getScTechnicianId() != null) {
             Account tech = accountRepository.findById(request.getScTechnicianId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Technician: " + request.getScTechnicianId()));
             claim.setServiceCenterTechnician(tech);
         }
 
+        // --- Campaigns ---
+        if (request.getCampaignIds() != null && !request.getCampaignIds().isEmpty()) {
+            List<Campaign> campaigns = campaignRepository.findAllById(request.getCampaignIds());
+            if (campaigns.isEmpty()) {
+                throw new ResourceNotFoundException("Không tìm thấy campaign hợp lệ.");
+            }
+
+            // Lấy model của xe
+            String vehicleModel = vehicle.getModel();
+
+            // Kiểm tra: model của xe phải nằm trong model list của ÍT NHẤT MỘT campaign
+            boolean valid = campaigns.stream()
+                    .anyMatch(c -> c.getModel().contains(vehicleModel));
+
+            if (!valid) {
+                throw new IllegalArgumentException("Xe có model '" + vehicleModel +
+                        "' không nằm trong danh sách model của bất kỳ campaign nào được chọn.");
+            }
+
+            claim.setCampaigns(campaigns);
+        }
+
         WarrantyClaim saved = warrantyClaimRepository.save(claim);
         return mapToResponse(saved);
     }
+
 
     /**
      * Cập nhật claim: chỉ sửa mô tả, ngày, quan hệ
@@ -155,46 +180,31 @@ public class WarrantyClaimService {
         WarrantyClaimResponse res = new WarrantyClaimResponse();
         res.setClaimId(claim.getClaimId());
         res.setClaimDate(claim.getClaimDate());
-        res.setStatus(claim.getStatus() != null ? claim.getStatus().name() : null);
+        res.setStatus(claim.getStatus().name());
         res.setDescription(claim.getDescription());
         res.setEvmDescription(claim.getEvmDescription());
         res.setTechnicianDone(claim.isTechnicianDone());
         res.setScStaffDone(claim.isScStaffDone());
         res.setIsRepair(claim.getIsRepair());
 
-        // Vehicle chỉ lấy VIN
-        if (claim.getVehicle() != null) {
+        if (claim.getVehicle() != null)
             res.setVin(claim.getVehicle().getVin());
-        }
 
-        // Accounts chỉ lấy ID
-        if (claim.getServiceCenterStaff() != null) {
+        if (claim.getServiceCenterStaff() != null)
             res.setServiceCenterStaffId(claim.getServiceCenterStaff().getAccountId());
-        }
-        if (claim.getServiceCenterTechnician() != null) {
+        if (claim.getServiceCenterTechnician() != null)
             res.setServiceCenterTechnicianId(claim.getServiceCenterTechnician().getAccountId());
-        }
-        if (claim.getEvm() != null) {
+        if (claim.getEvm() != null)
             res.setEvmId(claim.getEvm().getAccountId());
-        }
 
-        // ClaimPartCheck — chỉ lấy partNumber
-        if (claim.getClaimPartChecks() != null && !claim.getClaimPartChecks().isEmpty()) {
-            res.setPartNumbers(
-                    claim.getClaimPartChecks().stream()
-                            .map(p -> p.getPartNumber())
-                            .collect(Collectors.toList())
-            );
-        }
+        if (claim.getClaimPartChecks() != null)
+            res.setPartNumbers(claim.getClaimPartChecks().stream().map(ClaimPartCheck::getPartNumber).toList());
 
-        // WarrantyFiles — chỉ lấy fileId
-        if (claim.getWarrantyFiles() != null && !claim.getWarrantyFiles().isEmpty()) {
-            res.setFileIds(
-                    claim.getWarrantyFiles().stream()
-                            .map(WarrantyFile::getFileId)
-                            .collect(Collectors.toList())
-            );
-        }
+        if (claim.getWarrantyFiles() != null)
+            res.setFileIds(claim.getWarrantyFiles().stream().map(WarrantyFile::getFileId).toList());
+
+        if (claim.getCampaigns() != null)
+            res.setCampaignIds(claim.getCampaigns().stream().map(Campaign::getCampaignId).toList());
 
         return res;
     }
