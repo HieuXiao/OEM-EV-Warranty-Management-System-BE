@@ -18,8 +18,6 @@ public interface ClaimPartCheckRepository extends JpaRepository<ClaimPartCheck, 
     // kiểm tra xem partNumber có tồn tại chưa
     boolean existsByPartNumber(String partNumber);
 
-    boolean existsByPartSerial(String partSerial);
-
     boolean existsByPartNumberAndWarrantyClaim_ClaimId(String partNumber, String claimId);
 
     ClaimPartCheck findByPartNumberAndWarrantyClaim_ClaimId(String partNumber, String claimId);
