@@ -18,7 +18,7 @@ import java.util.List;
 public class WarrantyFile {
 
     @Id
-    @Column(name = "file_id", length = 20)
+    @Column(name = "file_id", length = 100)
     @NotEmpty(message = "File ID cannot be empty")
     private String fileId;
 
