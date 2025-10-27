@@ -38,10 +38,6 @@ public class ClaimPartCheckService {
             throw new DuplicateResourceException("PartNumber đã tồn tại: " + request.getPartNumber());
         }
 
-        if (claimPartCheckRepository.existsByPartSerial(request.getPartSerial())) {
-            throw new DuplicateResourceException("PartSerial đã tồn tại: " + request.getPartSerial());
-        }
-
         WarrantyClaim warrantyClaim = warrantyClaimRepository.findById(request.getWarrantyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + request.getWarrantyId()));
 
