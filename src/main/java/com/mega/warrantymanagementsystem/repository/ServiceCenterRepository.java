@@ -12,4 +12,5 @@ public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, In
     List<ServiceCenter> findByLocation(String location);
     boolean existsByCenterNameIgnoreCase(String centerName);
 
+    boolean existsByLocationIgnoreCase(String location);
 }

@@ -30,9 +30,18 @@ public class ServiceCenterService {
      * Tạo mới Service Center.
      */
     public ServiceCenterResponse create(ServiceCenterRequest request) {
-        boolean exists = serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName());
-        if (exists) {
-            throw new DuplicateResourceException("Service Center name already exists: " + request.getCenterName());
+        // check trùng name
+        if (serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName())) {
+            throw new DuplicateResourceException(
+                    "Service Center name already exists: " + request.getCenterName()
+            );
+        }
+
+        // check trùng location
+        if (serviceCenterRepository.existsByLocationIgnoreCase(request.getLocation())) {
+            throw new DuplicateResourceException(
+                    "Service Center location already exists: " + request.getLocation()
+            );
         }
 
         ServiceCenter center = modelMapper.map(request, ServiceCenter.class);
@@ -51,6 +60,13 @@ public class ServiceCenterService {
         if (!existing.getCenterName().equalsIgnoreCase(request.getCenterName())
                 && serviceCenterRepository.existsByCenterNameIgnoreCase(request.getCenterName())) {
             throw new DuplicateResourceException("Service Center name already exists: " + request.getCenterName());
+        }
+        // check trùng location nếu khác location cũ
+        if (!existing.getLocation().equalsIgnoreCase(request.getLocation())
+                && serviceCenterRepository.existsByLocationIgnoreCase(request.getLocation())) {
+            throw new DuplicateResourceException(
+                    "Service Center location already exists: " + request.getLocation()
+            );
         }
 
         existing.setCenterName(request.getCenterName());
