@@ -1,11 +1,16 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.Campaign;
+import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import com.mega.warrantymanagementsystem.model.response.CampaignResponse;
+import com.mega.warrantymanagementsystem.model.response.CustomerResponse;
+import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
 import com.mega.warrantymanagementsystem.repository.CampaignRepository;
+import com.mega.warrantymanagementsystem.repository.CustomerRepository;
+import com.mega.warrantymanagementsystem.repository.VehicleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,12 @@ public class CampaignService {
 
     @Autowired
     private CampaignRepository campaignRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -92,6 +103,31 @@ public class CampaignService {
                 .stream()
                 .map(c -> modelMapper.map(c, CampaignResponse.class))
                 .collect(Collectors.toList());
+    }
+
+    public List<VehicleResponse> getVehiclesByCampaignModel(int campaignId) {
+        Campaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy campaign: " + campaignId));
+
+        List<String> models = campaign.getModel();
+        return vehicleRepository.findAll().stream()
+                .filter(v -> models.contains(v.getModel()))
+                .map(v -> modelMapper.map(v, VehicleResponse.class))
+                .toList();
+    }
+
+    public List<CustomerResponse> getCustomersByCampaignModel(int campaignId) {
+        Campaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy campaign: " + campaignId));
+
+        List<String> models = campaign.getModel();
+
+        return vehicleRepository.findAll().stream()
+                .filter(v -> models.contains(v.getModel()) && v.getCustomer() != null)
+                .map(Vehicle::getCustomer)
+                .distinct()
+                .map(c -> modelMapper.map(c, CustomerResponse.class))
+                .toList();
     }
 
 }

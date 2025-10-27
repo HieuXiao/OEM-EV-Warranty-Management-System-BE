@@ -28,4 +28,7 @@ public class WarrantyClaimResponse {
 
     // Danh sách fileId thay vì toàn bộ WarrantyFileResponse (nếu bạn muốn)
     private List<String> fileIds;
+
+    // ID các campaign gắn với claim (nếu có)
+    private List<Integer> campaignIds;
 }

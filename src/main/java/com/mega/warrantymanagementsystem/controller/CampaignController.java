@@ -2,6 +2,10 @@ package com.mega.warrantymanagementsystem.controller;
 
 import com.mega.warrantymanagementsystem.model.request.CampaignRequest;
 import com.mega.warrantymanagementsystem.model.response.CampaignResponse;
+import com.mega.warrantymanagementsystem.model.response.CustomerResponse;
+import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
+import com.mega.warrantymanagementsystem.repository.CustomerRepository;
+import com.mega.warrantymanagementsystem.repository.VehicleRepository;
 import com.mega.warrantymanagementsystem.service.CampaignService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,12 @@ public class CampaignController {
 
     @Autowired
     private CampaignService campaignService;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     // ---------- CREATE ----------
     @PostMapping("/create")
@@ -52,6 +62,16 @@ public class CampaignController {
     @GetMapping("/search/by-name")
     public List<CampaignResponse> searchCampaignByName(@RequestParam("value") String name) {
         return campaignService.searchByName(name);
+    }
+
+    @GetMapping("/{id}/vehicles")
+    public List<VehicleResponse> getVehiclesByCampaignModel(@PathVariable int id) {
+        return campaignService.getVehiclesByCampaignModel(id);
+    }
+
+    @GetMapping("/{id}/customers")
+    public List<CustomerResponse> getCustomersByCampaignModel(@PathVariable int id) {
+        return campaignService.getCustomersByCampaignModel(id);
     }
 
 }
