@@ -47,9 +47,9 @@ public class PolicyService {
 
 
         // nếu client gửi partSerial thì phải lấy PartUnderWarranty từ DB
-        if (request.getPartNumber() != null && !request.getPartNumber().isBlank()) {
-            PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartNumber())
-                    .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartNumber()));
+        if (request.getPartSerial() != null && !request.getPartSerial().isBlank()) {
+            PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartSerial())
+                    .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartSerial()));
             policy.setPartUnderWarranty(part);
         }
 
@@ -85,12 +85,12 @@ public class PolicyService {
         if (request.getIsEnable() != null) existing.setIsEnable(request.getIsEnable());
 
         // xử lý partSerial nếu có
-        if (request.getPartNumber() != null) {
-            if (request.getPartNumber().isBlank()) {
+        if (request.getPartSerial() != null) {
+            if (request.getPartSerial().isBlank()) {
                 existing.setPartUnderWarranty(null); // clear association
             } else {
-                PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartNumber())
-                        .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartNumber()));
+                PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartSerial())
+                        .orElseThrow(() -> new ResourceNotFoundException("PartUnderWarranty not found: " + request.getPartSerial()));
                 existing.setPartUnderWarranty(part);
             }
         }

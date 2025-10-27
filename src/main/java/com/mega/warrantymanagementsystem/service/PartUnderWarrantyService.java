@@ -30,8 +30,8 @@ public class PartUnderWarrantyService {
     // CREATE
     public PartUnderWarrantyResponse createPart(PartUnderWarrantyRequest request) {
         // kiểm tra trùng serial
-        if (partRepo.existsById(request.getPartNumber())) {
-            throw new DuplicateResourceException("Part serial already exists: " + request.getPartNumber());
+        if (partRepo.existsById(request.getPartSerial())) {
+            throw new DuplicateResourceException("Part serial already exists: " + request.getPartSerial());
         }
 
         PartUnderWarranty part = modelMapper.map(request, PartUnderWarranty.class);

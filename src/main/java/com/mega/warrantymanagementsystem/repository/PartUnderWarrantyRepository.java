@@ -11,7 +11,7 @@ import java.util.List;
 public interface PartUnderWarrantyRepository extends JpaRepository<PartUnderWarranty, String> {
 
     // tìm part theo serial
-    PartUnderWarranty findByPartNumber(String partNumber);
+    PartUnderWarranty findByPartSerial(String partSerial);
 
     // tìm các part theo tên
     List<PartUnderWarranty> findByPartName(String partName);
@@ -20,7 +20,7 @@ public interface PartUnderWarrantyRepository extends JpaRepository<PartUnderWarr
     List<PartUnderWarranty> findByAdmin(Account admin);
 
     // kiểm tra trùng serial
-    boolean existsByPartNumber(String partNumber);
+    boolean existsByPartSerial(String partSerial);
 
     List<PartUnderWarranty> findByVehicleModel(String vehicleModel);
     List<PartUnderWarranty> findByIsEnable(Boolean isEnable);
