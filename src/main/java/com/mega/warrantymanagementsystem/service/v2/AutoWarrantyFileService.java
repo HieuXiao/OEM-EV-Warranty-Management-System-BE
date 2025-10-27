@@ -1,11 +1,12 @@
 package com.mega.warrantymanagementsystem.service.v2;
 
+import com.mega.warrantymanagementsystem.entity.ClaimPartCheck;
 import com.mega.warrantymanagementsystem.entity.Vehicle;
 import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 import com.mega.warrantymanagementsystem.entity.WarrantyFile;
 import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
+import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
-import com.mega.warrantymanagementsystem.model.request.AutoWarrantyFileRequest;
 import com.mega.warrantymanagementsystem.model.response.WarrantyFileResponse;
 import com.mega.warrantymanagementsystem.repository.WarrantyClaimRepository;
 import com.mega.warrantymanagementsystem.repository.WarrantyFileRepository;
@@ -20,9 +21,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Tự động tạo fileId cho WarrantyFile theo cấu trúc:
- *   model_date_claimId_index
- * Ví dụ: VF9_20251026_WDC2020_1
+ * Upload ảnh WarrantyFile:
+ *  - Tự động sinh fileId theo: model_date_claim_index
+ *  - Chỉ cho phép upload khi claim có ít nhất 1 part cần sửa (isRepair=true)
+ *  - Nếu claim đang CHECK và có ảnh => chuyển sang DECIDE
  */
 @Service
 public class AutoWarrantyFileService {
@@ -38,6 +40,7 @@ public class AutoWarrantyFileService {
 
     /**
      * Upload file lên Cloudinary và tạo WarrantyFile với fileId tự động.
+     * Kiểm tra logic claim & part trước khi cho phép.
      */
     @Transactional
     public WarrantyFileResponse uploadAndCreate(String claimId, List<MultipartFile> files) {
@@ -45,10 +48,19 @@ public class AutoWarrantyFileService {
         WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + claimId));
 
+        // Kiểm tra: claim phải có ít nhất 1 part cần sửa
+        boolean hasRepairPart = claim.getClaimPartChecks() != null &&
+                claim.getClaimPartChecks().stream()
+                        .anyMatch(c -> Boolean.TRUE.equals(c.getIsRepair())); // <- fix: null-safe
+
+        if (!hasRepairPart) {
+            throw new BusinessLogicException("Không có bộ phận cần sửa nên không cần ảnh.");
+        }
+
         // Upload lên Cloudinary
         List<String> urls = cloudinaryService.uploadFiles(files, "warranty_files");
 
-        // Tạo fileId động
+        // Sinh fileId động
         String fileId = generateFileId(claim);
 
         // Tạo WarrantyFile entity
@@ -87,6 +99,7 @@ public class AutoWarrantyFileService {
 
     /**
      * Sinh fileId theo công thức: model_date_claimId_index
+     * Ví dụ: VF9_20251026_WDC2020_1
      */
     private String generateFileId(WarrantyClaim claim) {
         Vehicle vehicle = claim.getVehicle();

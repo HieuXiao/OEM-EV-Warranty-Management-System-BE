@@ -1,8 +1,10 @@
 package com.mega.warrantymanagementsystem.service;
 
+import com.mega.warrantymanagementsystem.entity.ClaimPartCheck;
 import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 import com.mega.warrantymanagementsystem.entity.WarrantyFile;
 import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
+import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.WarrantyFileRequest;
 import com.mega.warrantymanagementsystem.model.response.WarrantyFileResponse;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +36,10 @@ public class WarrantyFileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim với ID: " + request.getClaimId()));
 
         WarrantyFile file = new WarrantyFile();
-        file.setFileId(request.getFileId());
+        // nếu client không gửi fileId, gen UUID ngắn
+        file.setFileId(request.getFileId() == null || request.getFileId().isBlank()
+                ? "WF-" + UUID.randomUUID().toString()
+                : request.getFileId());
         file.setWarrantyClaim(claim);
         file.setMediaUrls(request.getMediaUrls());
 
@@ -99,32 +105,42 @@ public class WarrantyFileService {
         return res;
     }
 
+    // --- Upload trực tiếp ---
     public WarrantyFileResponse uploadAndSave(String fileId, String claimId, List<MultipartFile> files) {
-        // Upload lên Cloudinary
         List<String> urls = cloudinaryService.uploadFiles(files, "warranty_files");
 
-        // Tạo request object
         WarrantyFileRequest req = new WarrantyFileRequest();
         req.setFileId(fileId);
         req.setClaimId(claimId);
         req.setMediaUrls(urls);
 
-        // Lưu vào DB
         return create(req);
     }
 
+    // --- Tạo file từ danh sách URL (ảnh đã có) ---
     public WarrantyFileResponse createFromUrls(String fileId, String claimId, List<String> urls) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim với ID: " + claimId));
+
+        // CHỈ: nếu có ít nhất 1 ClaimPartCheck với isRepair == true
+        boolean anyRepair = claim.getClaimPartChecks() != null &&
+                claim.getClaimPartChecks()
+                        .stream()
+                        // không dùng method reference -> dùng getIsRepair() và so sánh Boolean.TRUE để null-safe
+                        .anyMatch(c -> Boolean.TRUE.equals(c.getIsRepair()));
+
+        if (!anyRepair) {
+            throw new BusinessLogicException("Không có bộ phận nào được đánh dấu cần sửa (isRepair=true). Không thể thêm ảnh.");
+        }
+
         WarrantyFileRequest req = new WarrantyFileRequest();
         req.setFileId(fileId);
         req.setClaimId(claimId);
         req.setMediaUrls(urls);
-        // Tạo file như bình thường
+
         WarrantyFileResponse response = create(req);
 
-        // Sau khi thêm file, cập nhật trạng thái claim
-        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim với ID: " + claimId));
-
+        // Nếu claim đang ở CHECK -> chuyển sang DECIDE
         if (claim.getStatus() == WarrantyClaimStatus.CHECK) {
             claim.setStatus(WarrantyClaimStatus.DECIDE);
             warrantyClaimRepository.save(claim);
@@ -132,5 +148,4 @@ public class WarrantyFileService {
 
         return response;
     }
-
 }

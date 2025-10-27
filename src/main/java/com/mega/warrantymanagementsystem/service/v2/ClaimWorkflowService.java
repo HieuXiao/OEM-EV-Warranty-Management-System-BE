@@ -84,15 +84,24 @@ public class ClaimWorkflowService {
             throw new BusinessLogicException("EVM không được phép chỉnh claim này.");
         }
 
-        if (claim.getStatus() != WarrantyClaimStatus.REPAIR) {
-            throw new BusinessLogicException("Không thể thêm mô tả khi claim đã qua HANDOVER hoặc DONE.");
+        // YÊU CẦU: chỉ được thêm mô tả khi claim đang DECIDE
+        if (claim.getEvm() == null) {
+            throw new BusinessLogicException("Claim chưa được gán EVM.");
+        }
+        if (claim.getStatus() != WarrantyClaimStatus.DECIDE) {
+            throw new BusinessLogicException("Chỉ có thể thêm mô tả khi claim ở DECIDE.");
         }
 
+
         claim.setEvmDescription(description);
+        // Khi EVM điền description => chuyển DECIDE -> REPAIR
+        claim.setStatus(WarrantyClaimStatus.REPAIR);
+
         warrantyClaimRepository.save(claim);
 
         return mapToResponse(claim);
     }
+
 
     @Transactional
     public WarrantyClaimResponse technicianSkipRepair(String claimId, String technicianId) {

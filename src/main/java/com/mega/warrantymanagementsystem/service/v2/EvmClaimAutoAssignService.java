@@ -75,7 +75,7 @@ public class EvmClaimAutoAssignService {
 
             Account selectedEvm = evmStaffs.get(index);
             claim.setEvm(selectedEvm);
-            claim.setStatus(WarrantyClaimStatus.REPAIR);
+//            claim.setStatus(WarrantyClaimStatus.REPAIR);
 
             warrantyClaimRepository.save(claim);
 
