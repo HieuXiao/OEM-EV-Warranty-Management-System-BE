@@ -170,5 +170,43 @@ public class ClaimWorkflowService {
         return mapToResponse(claim);
     }
 
+    /**
+     * EVM staff quyết định chuyển trực tiếp từ DECIDE → HANDOVER
+     * (bỏ qua REPAIR), có thể kèm hoặc không kèm description.
+     */
+    @Transactional
+    public WarrantyClaimResponse evmDecisionToHandover(String claimId, String evmId, String description) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Claim với ID: " + claimId));
+
+        // Phải có EVM được gán
+        if (claim.getEvm() == null) {
+            throw new BusinessLogicException("Claim này chưa được gán EVM, không thể thao tác.");
+        }
+
+        // Kiểm tra đúng người EVM đang thực hiện
+        if (!claim.getEvm().getAccountId().equalsIgnoreCase(evmId)) {
+            throw new BusinessLogicException("EVM không có quyền thực hiện trên claim này.");
+        }
+
+        // Phải ở trạng thái DECIDE
+        if (claim.getStatus() != WarrantyClaimStatus.DECIDE) {
+            throw new BusinessLogicException("Chỉ có thể chuyển từ DECIDE sang HANDOVER.");
+        }
+
+        // Cập nhật description nếu có
+        if (description != null && !description.isBlank()) {
+            claim.setEvmDescription(description);
+        }
+
+        // Chuyển sang HANDOVER
+        claim.setStatus(WarrantyClaimStatus.HANDOVER);
+
+        // Lưu lại
+        warrantyClaimRepository.save(claim);
+
+        return mapToResponse(claim);
+    }
+
 
 }
