@@ -138,4 +138,37 @@ public class ClaimWorkflowService {
         res.setStatus(claim.getStatus().name());
         return res;
     }
+
+    /**
+     * SC Staff bỏ qua bước EVM, chuyển DECIDE → HANDOVER khi claim chưa có EVM.
+     */
+    @Transactional
+    public WarrantyClaimResponse scStaffSkipEvmAndHandover(String claimId, String staffId) {
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Claim: " + claimId));
+
+        // Kiểm tra quyền của Staff
+        if (claim.getServiceCenterStaff() == null ||
+                !claim.getServiceCenterStaff().getAccountId().equalsIgnoreCase(staffId)) {
+            throw new BusinessLogicException("Staff không có quyền thao tác claim này.");
+        }
+
+        // Phải ở trạng thái DECIDE
+        if (claim.getStatus() != WarrantyClaimStatus.DECIDE) {
+            throw new BusinessLogicException("Chỉ có thể bỏ qua EVM khi claim đang ở trạng thái DECIDE.");
+        }
+
+        // Chỉ khi chưa có EVM
+        if (claim.getEvm() != null) {
+            throw new BusinessLogicException("Claim đã có EVM, không thể bỏ qua bước DECIDE.");
+        }
+
+        // Chuyển sang HANDOVER
+        claim.setStatus(WarrantyClaimStatus.HANDOVER);
+        warrantyClaimRepository.save(claim);
+
+        return mapToResponse(claim);
+    }
+
+
 }

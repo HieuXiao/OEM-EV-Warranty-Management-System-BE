@@ -65,4 +65,16 @@ public class ClaimWorkflowController {
         return ResponseEntity.ok(claimWorkflowService.technicianSkipRepair(claimId, technicianId));
     }
 
+    /**
+     * SC Staff bỏ qua bước EVM, chuyển DECIDE → HANDOVER nếu chưa có EVM.
+     */
+    @PostMapping("/{claimId}/staff/skip-evm")
+    public ResponseEntity<WarrantyClaimResponse> skipEvmAndHandover(
+            @PathVariable String claimId,
+            @RequestParam String staffId) {
+        return ResponseEntity.ok(claimWorkflowService.scStaffSkipEvmAndHandover(claimId, staffId));
+    }
+
+
+
 }
