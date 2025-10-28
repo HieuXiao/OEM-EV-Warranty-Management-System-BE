@@ -74,4 +74,13 @@ public class AccountController {
         String message = accountService.assignServiceCenterToAccount(accountId, centerId);
         return ResponseEntity.ok(message);
     }
+
+    @PutMapping("/{accountId}/change-service-center/{newCenterId}")
+    public ResponseEntity<String> changeServiceCenter(
+            @PathVariable String accountId,
+            @PathVariable int newCenterId) {
+        String result = accountService.changeServiceCenterForAccount(accountId, newCenterId);
+        return ResponseEntity.ok(result);
+    }
+
 }

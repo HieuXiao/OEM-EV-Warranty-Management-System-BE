@@ -4,6 +4,7 @@ import com.mega.warrantymanagementsystem.entity.ServiceAppointment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -18,4 +19,7 @@ public interface ServiceAppointmentRepository extends JpaRepository<ServiceAppoi
 
     // Tìm lịch hẹn trong khoảng thời gian
     List<ServiceAppointment> findByDateBetween(LocalDateTime start, LocalDateTime end);
+
+    boolean existsByVehicle_VinAndDate(String vin, LocalDate date);
+
 }

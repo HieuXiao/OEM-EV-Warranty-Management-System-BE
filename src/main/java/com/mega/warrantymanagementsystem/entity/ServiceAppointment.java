@@ -42,4 +42,6 @@ public class ServiceAppointment {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "status", nullable = true, length = 50)
+    private String status;
 }

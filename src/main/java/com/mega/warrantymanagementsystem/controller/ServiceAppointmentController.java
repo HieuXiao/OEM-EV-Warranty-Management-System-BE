@@ -1,11 +1,14 @@
 package com.mega.warrantymanagementsystem.controller;
 
+import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.ServiceAppointmentRequest;
 import com.mega.warrantymanagementsystem.model.response.ServiceAppointmentResponse;
 import com.mega.warrantymanagementsystem.service.ServiceAppointmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -82,5 +85,23 @@ public class ServiceAppointmentController {
     public List<ServiceAppointmentResponse> getByDate(
             @RequestParam("value") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return serviceAppointmentService.getByDate(date);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<String> updateStatus(
+            @PathVariable("id") int id,
+            @RequestParam("status") String status) {
+
+        try {
+            String message = serviceAppointmentService.updateStatus(id, status);
+            return ResponseEntity.ok(message);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("System error: " + e.getMessage());
+        }
     }
 }

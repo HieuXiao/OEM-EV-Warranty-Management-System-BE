@@ -295,4 +295,37 @@ public class AccountService implements UserDetailsService {
     //B1: lấy username người dùng nhập
     //B2: tìm trong DB xem có account nào trùng với username đó không (LoadUserByUsername)
     //B3: authenticationManager => compare tk password dưới db <=> password người dùng nhập
+
+
+    @Transactional
+    public String changeServiceCenterForAccount(String accountId, int newServiceCenterId) {
+        Optional<Account> accountOpt = accountRepository.findById(accountId.toUpperCase());
+        if (accountOpt.isEmpty()) {
+            return "account not found";
+        }
+        Account account = accountOpt.get();
+
+        // check if account currently has a service center
+        if (account.getServiceCenter() == null) {
+            return "cannot change because this account has no service center assigned";
+        }
+
+        // get new service center
+        Optional<ServiceCenter> centerOpt = serviceCenterRepository.findById(newServiceCenterId);
+        if (centerOpt.isEmpty()) {
+            return "new service center not found";
+        }
+        ServiceCenter newCenter = centerOpt.get();
+
+        // check if it's already the same
+        if (account.getServiceCenter().getCenterId() == newServiceCenterId) {
+            return "this account is already assigned to the selected service center";
+        }
+
+        // update and save
+        account.setServiceCenter(newCenter);
+        accountRepository.save(account);
+
+        return "service center changed successfully for account " + accountId;
+    }
 }
