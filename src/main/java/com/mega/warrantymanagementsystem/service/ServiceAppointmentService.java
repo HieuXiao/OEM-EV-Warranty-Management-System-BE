@@ -61,7 +61,7 @@ public class ServiceAppointmentService {
         appointment.setDescription(request.getDescription());
         appointment.setVehicle(vehicle);
         appointment.setCampaign(campaign);
-        appointment.setStatus(null); // optional
+        appointment.setStatus("Scheduled"); // optional
 
         ServiceAppointment saved = serviceAppointmentRepository.save(appointment);
         return modelMapper.map(saved, ServiceAppointmentResponse.class);
