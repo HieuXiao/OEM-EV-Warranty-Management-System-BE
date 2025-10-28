@@ -11,4 +11,5 @@ public class ServiceAppointmentRequest {
     private Integer campaignId;
     private LocalDateTime date; // đổi tên để khớp với entity
     private String description;
+
 }
