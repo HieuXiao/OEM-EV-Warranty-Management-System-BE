@@ -61,10 +61,10 @@ public class AccountController {
             @RequestParam boolean enabled) {
         return ResponseEntity.ok(accountService.updateAccountStatus(accountId, enabled));
     }
-//    @GetMapping("/current")
-//    public ResponseEntity<AccountResponse> getCurrentAccount() {
-//        return ResponseEntity.ok(accountService.getCurrentAccount());
-//    }
+    @GetMapping("/current")
+    public ResponseEntity<AccountResponse> getCurrentAccount() {
+        return ResponseEntity.ok(accountService.getCurrentAccount());
+    }
 
     @PostMapping("/assign-service-center/{accountId}/{centerId}")
     public ResponseEntity<String> assignServiceCenterToAccount(

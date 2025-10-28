@@ -44,42 +44,39 @@ public class AutoWarrantyFileService {
      */
     @Transactional
     public WarrantyFileResponse uploadAndCreate(String claimId, List<MultipartFile> files) {
-        // Tìm claim
         WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + claimId));
 
-        // Kiểm tra: claim phải có ít nhất 1 part cần sửa
+        // Ép Hibernate load claim thật (tránh proxy lỗi)
+        warrantyClaimRepository.flush();
+
         boolean hasRepairPart = claim.getClaimPartChecks() != null &&
                 claim.getClaimPartChecks().stream()
-                        .anyMatch(c -> Boolean.TRUE.equals(c.getIsRepair())); // <- fix: null-safe
+                        .anyMatch(c -> Boolean.TRUE.equals(c.getIsRepair()));
 
         if (!hasRepairPart) {
             throw new BusinessLogicException("Không có bộ phận cần sửa nên không cần ảnh.");
         }
 
-        // Upload lên Cloudinary
         List<String> urls = cloudinaryService.uploadFiles(files, "warranty_files");
 
-        // Sinh fileId động
         String fileId = generateFileId(claim);
 
-        // Tạo WarrantyFile entity
         WarrantyFile file = new WarrantyFile();
         file.setFileId(fileId);
-        file.setWarrantyClaim(claim);
+        file.setWarrantyClaim(claim); // claim thật, không proxy
         file.setMediaUrls(urls);
 
-        // Lưu DB
-        WarrantyFile saved = warrantyFileRepository.save(file);
+        WarrantyFile saved = warrantyFileRepository.saveAndFlush(file);
 
-        // Nếu claim đang CHECK → chuyển sang DECIDE
         if (claim.getStatus() == WarrantyClaimStatus.CHECK) {
             claim.setStatus(WarrantyClaimStatus.DECIDE);
-            warrantyClaimRepository.save(claim);
+            warrantyClaimRepository.saveAndFlush(claim);
         }
 
         return toResponse(saved);
     }
+
 
     /**
      * Cập nhật lại mediaUrls (update ảnh/video cho WarrantyFile có sẵn).

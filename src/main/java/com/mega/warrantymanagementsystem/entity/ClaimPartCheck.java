@@ -31,7 +31,7 @@ public class ClaimPartCheck {
     private Vehicle vehicle; // FK → Vehicle.vin
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "part_id", nullable = false)
+    @JoinColumn(name = "part_id", nullable = true)
     private PartUnderWarranty partUnderWarranty; // FK → PartUnderWarranty.partId
 
     @Column(name = "quantity", nullable = false)

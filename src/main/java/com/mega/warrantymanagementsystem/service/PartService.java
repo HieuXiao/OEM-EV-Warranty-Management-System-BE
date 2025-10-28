@@ -99,6 +99,7 @@ public class PartService {
             WarehouseResponse whResp = new WarehouseResponse();
             whResp.setWhId(part.getWarehouse().getWhId());
             whResp.setName(part.getWarehouse().getName());
+            whResp.setLocation(part.getWarehouse().getLocation());
             resp.setWarehouse(whResp);
         }
 

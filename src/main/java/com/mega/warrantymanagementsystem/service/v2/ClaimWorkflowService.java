@@ -23,6 +23,9 @@ public class ClaimWorkflowService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private RepairPartService repairPartService;
+
     /**
      * Technician hoàn tất sửa chữa → chuyển REPAIR → HANDOVER
      */
@@ -98,6 +101,8 @@ public class ClaimWorkflowService {
         claim.setStatus(WarrantyClaimStatus.REPAIR);
 
         warrantyClaimRepository.save(claim);
+
+        repairPartService.handleRepairParts(claimId);
 
         return mapToResponse(claim);
     }
