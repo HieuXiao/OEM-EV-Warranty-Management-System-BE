@@ -24,5 +24,8 @@ public class ClaimPartCheckRequest {
 
     private Boolean isRepair;
 
+    private String partId; // optional, link sang PartUnderWarranty
+
+
 //    private String partSerial; // optional
 }

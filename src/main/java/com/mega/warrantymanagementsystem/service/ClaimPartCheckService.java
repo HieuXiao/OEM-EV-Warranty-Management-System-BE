@@ -1,9 +1,6 @@
 package com.mega.warrantymanagementsystem.service;
 
-import com.mega.warrantymanagementsystem.entity.ClaimPartCheck;
-import com.mega.warrantymanagementsystem.entity.ClaimPartSerial;
-import com.mega.warrantymanagementsystem.entity.Vehicle;
-import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
+import com.mega.warrantymanagementsystem.entity.*;
 import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
@@ -11,6 +8,7 @@ import com.mega.warrantymanagementsystem.model.request.ClaimPartCheckRequest;
 import com.mega.warrantymanagementsystem.model.response.ClaimPartCheckResponse;
 import com.mega.warrantymanagementsystem.model.response.VehicleResponse;
 import com.mega.warrantymanagementsystem.repository.ClaimPartCheckRepository;
+import com.mega.warrantymanagementsystem.repository.PartUnderWarrantyRepository;
 import com.mega.warrantymanagementsystem.repository.VehicleRepository;
 import com.mega.warrantymanagementsystem.repository.WarrantyClaimRepository;
 import jakarta.transaction.Transactional;
@@ -32,6 +30,10 @@ public class ClaimPartCheckService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
+    @Autowired
+    private PartUnderWarrantyRepository partUnderWarrantyRepository;
+
+
     // ================= CREATE =================
     public ClaimPartCheckResponse create(ClaimPartCheckRequest request) {
         if (claimPartCheckRepository.existsByPartNumberAndWarrantyClaim_ClaimId(request.getPartNumber(), request.getWarrantyId())) {
@@ -51,6 +53,14 @@ public class ClaimPartCheckService {
         claimPartCheck.setVehicle(vehicle);
         claimPartCheck.setQuantity(request.getQuantity());
         claimPartCheck.setIsRepair(request.getIsRepair() != null ? request.getIsRepair() : false);
+
+        if (request.getPartId() != null && !request.getPartId().isEmpty()) {
+            PartUnderWarranty part = partUnderWarrantyRepository.findById(request.getPartId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy PartUnderWarranty: " + request.getPartId()));
+            claimPartCheck.setPartUnderWarranty(part);
+        } else {
+            claimPartCheck.setPartUnderWarranty(null);
+        }
 
         ClaimPartCheck saved = claimPartCheckRepository.save(claimPartCheck);
         return toResponse(saved);
