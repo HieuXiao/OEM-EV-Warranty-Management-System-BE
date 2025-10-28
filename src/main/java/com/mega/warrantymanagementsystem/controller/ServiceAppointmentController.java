@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -83,7 +84,7 @@ public class ServiceAppointmentController {
      */
     @GetMapping("/search/date")
     public List<ServiceAppointmentResponse> getByDate(
-            @RequestParam("value") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam("value") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date) {
         return serviceAppointmentService.getByDate(date);
     }
 

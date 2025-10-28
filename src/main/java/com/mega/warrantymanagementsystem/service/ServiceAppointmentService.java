@@ -13,14 +13,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service xử lý logic cho ServiceAppointment.
- * Bao gồm CRUD và search theo date, description.
- */
 @Service
 public class ServiceAppointmentService {
 
@@ -36,24 +32,24 @@ public class ServiceAppointmentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    /**
-     * Tạo mới appointment.
-     * Liên kết vehicle và campaign theo ID, sau đó lưu.
-     */
+    // ================= CREATE =================
     public ServiceAppointmentResponse create(ServiceAppointmentRequest request) {
         if (request.getDate() == null) {
-            throw new IllegalArgumentException("Appointment date cannot be null!");
+            throw new IllegalArgumentException("Appointment date and time cannot be null!");
         }
 
         Vehicle vehicle = vehicleRepository.findById(request.getVin())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with VIN: " + request.getVin()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Vehicle not found with VIN: " + request.getVin()));
 
         Campaign campaign = campaignRepository.findById(request.getCampaignId())
-                .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with ID: " + request.getCampaignId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Campaign not found with ID: " + request.getCampaignId()));
 
         boolean exists = serviceAppointmentRepository.existsByVehicle_VinAndDate(request.getVin(), request.getDate());
         if (exists) {
-            throw new IllegalArgumentException("An appointment already exists for this vehicle on the selected date!");
+            throw new IllegalArgumentException(
+                    "An appointment already exists for this vehicle at the selected date and time!");
         }
 
         ServiceAppointment appointment = new ServiceAppointment();
@@ -61,28 +57,27 @@ public class ServiceAppointmentService {
         appointment.setDescription(request.getDescription());
         appointment.setVehicle(vehicle);
         appointment.setCampaign(campaign);
-        appointment.setStatus("Scheduled"); // optional
+        appointment.setStatus("Scheduled"); // default value
 
         ServiceAppointment saved = serviceAppointmentRepository.save(appointment);
         return modelMapper.map(saved, ServiceAppointmentResponse.class);
     }
 
-    /**
-     * Cập nhật appointment.
-     */
+    // ================= UPDATE =================
     public ServiceAppointmentResponse update(Integer id, ServiceAppointmentRequest request) {
-
         ServiceAppointment existing = serviceAppointmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Service appointment not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Service appointment not found with ID: " + id));
 
         if (request.getDate() == null) {
-            throw new IllegalArgumentException("Appointment date cannot be null!");
+            throw new IllegalArgumentException("Appointment date and time cannot be null!");
         }
 
         if (request.getVin() != null) {
             boolean exists = serviceAppointmentRepository.existsByVehicle_VinAndDate(request.getVin(), request.getDate());
             if (exists && !existing.getVehicle().getVin().equals(request.getVin())) {
-                throw new IllegalArgumentException("Another appointment already exists for this vehicle on the selected date!");
+                throw new IllegalArgumentException(
+                        "Another appointment already exists for this vehicle at the selected date and time!");
             }
         }
 
@@ -91,13 +86,15 @@ public class ServiceAppointmentService {
 
         if (request.getVin() != null) {
             Vehicle vehicle = vehicleRepository.findById(request.getVin())
-                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with VIN: " + request.getVin()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Vehicle not found with VIN: " + request.getVin()));
             existing.setVehicle(vehicle);
         }
 
         if (request.getCampaignId() != null) {
             Campaign campaign = campaignRepository.findById(request.getCampaignId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Campaign not found with ID: " + request.getCampaignId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Campaign not found with ID: " + request.getCampaignId()));
             existing.setCampaign(campaign);
         }
 
@@ -105,37 +102,31 @@ public class ServiceAppointmentService {
         return modelMapper.map(updated, ServiceAppointmentResponse.class);
     }
 
-    /**
-     * Xóa appointment.
-     */
+    // ================= DELETE =================
     public void delete(Integer id) {
         if (!serviceAppointmentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Service appointment not found with ID: " + id);
+            throw new ResourceNotFoundException(
+                    "Service appointment not found with ID: " + id);
         }
         serviceAppointmentRepository.deleteById(id);
     }
 
-    /**
-     * Lấy tất cả appointment.
-     */
+    // ================= GET ALL =================
     public List<ServiceAppointmentResponse> getAll() {
         return serviceAppointmentRepository.findAll().stream()
                 .map(a -> modelMapper.map(a, ServiceAppointmentResponse.class))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Lấy appointment theo ID.
-     */
+    // ================= GET BY ID =================
     public ServiceAppointmentResponse getById(Integer id) {
         ServiceAppointment appointment = serviceAppointmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Service appointment not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Service appointment not found with ID: " + id));
         return modelMapper.map(appointment, ServiceAppointmentResponse.class);
     }
 
-    /**
-     * Tìm appointment theo mô tả.
-     */
+    // ================= SEARCH BY DESCRIPTION =================
     public List<ServiceAppointmentResponse> getByDescription(String description) {
         return serviceAppointmentRepository.findAll().stream()
                 .filter(a -> a.getDescription() != null &&
@@ -144,32 +135,28 @@ public class ServiceAppointmentService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Tìm appointment theo ngày (LocalDate).
-     */
-    public List<ServiceAppointmentResponse> getByDate(LocalDate date) {
+    // ================= SEARCH BY DATE =================
+    public List<ServiceAppointmentResponse> getByDate(LocalDateTime date) {
         return serviceAppointmentRepository.findAll().stream()
-                .filter(a -> a.getDate() != null && a.getDate().isEqual(date))
+                .filter(a -> a.getDate() != null && a.getDate().equals(date))
                 .map(a -> modelMapper.map(a, ServiceAppointmentResponse.class))
                 .collect(Collectors.toList());
     }
 
+    // ================= UPDATE STATUS =================
     public String updateStatus(int appointmentId, String newStatus) {
-        // check if appointment exists
         ServiceAppointment appointment = serviceAppointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Service appointment not found with ID: " + appointmentId));
 
-        // validate status
         if (newStatus == null || newStatus.trim().isEmpty()) {
             throw new IllegalArgumentException("Status cannot be empty!");
         }
 
-        // update and save
         appointment.setStatus(newStatus.trim());
         serviceAppointmentRepository.save(appointment);
 
-        return "Status updated successfully for appointment ID " + appointmentId
-                + " to: " + newStatus;
+        return "Status updated successfully for appointment ID " + appointmentId +
+                " to: " + newStatus;
     }
 }
