@@ -38,6 +38,23 @@ public class WarrantyClaimService {
      * Tạo mới WarrantyClaim (status mặc định CHECK)
      */
     public WarrantyClaimResponse create(WarrantyClaimRequest request) {
+
+        // --- Empty field checks ---
+        if (request.getClaimId() == null || request.getClaimId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Claim ID cannot be empty.");
+        }
+        if (request.getVin() == null || request.getVin().trim().isEmpty()) {
+            throw new IllegalArgumentException("VIN cannot be empty.");
+        }
+        if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Description cannot be empty.");
+        }
+
+        // --- Duplicate check ---
+        if (warrantyClaimRepository.existsById(request.getClaimId())) {
+            throw new IllegalArgumentException("Claim ID already exists: " + request.getClaimId());
+        }
+
         WarrantyClaim claim = new WarrantyClaim();
 
         claim.setClaimId(request.getClaimId());
@@ -47,19 +64,19 @@ public class WarrantyClaimService {
 
         // --- Vehicle ---
         Vehicle vehicle = vehicleRepository.findById(request.getVin())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe với VIN: " + request.getVin()));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with VIN: " + request.getVin()));
         claim.setVehicle(vehicle);
 
         // --- Staff & Technician ---
         if (request.getScStaffId() != null) {
             Account staff = accountRepository.findById(request.getScStaffId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy SC Staff: " + request.getScStaffId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Service center staff not found: " + request.getScStaffId()));
             claim.setServiceCenterStaff(staff);
         }
 
         if (request.getScTechnicianId() != null) {
             Account tech = accountRepository.findById(request.getScTechnicianId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Technician: " + request.getScTechnicianId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found: " + request.getScTechnicianId()));
             claim.setServiceCenterTechnician(tech);
         }
 
@@ -67,19 +84,17 @@ public class WarrantyClaimService {
         if (request.getCampaignIds() != null && !request.getCampaignIds().isEmpty()) {
             List<Campaign> campaigns = campaignRepository.findAllById(request.getCampaignIds());
             if (campaigns.isEmpty()) {
-                throw new ResourceNotFoundException("Không tìm thấy campaign hợp lệ.");
+                throw new ResourceNotFoundException("No valid campaign found.");
             }
 
-            // Lấy model của xe
+            // Vehicle model validation
             String vehicleModel = vehicle.getModel();
-
-            // Kiểm tra: model của xe phải nằm trong model list của ÍT NHẤT MỘT campaign
             boolean valid = campaigns.stream()
                     .anyMatch(c -> c.getModel().contains(vehicleModel));
 
             if (!valid) {
-                throw new IllegalArgumentException("Xe có model '" + vehicleModel +
-                        "' không nằm trong danh sách model của bất kỳ campaign nào được chọn.");
+                throw new IllegalArgumentException("Vehicle model '" + vehicleModel +
+                        "' is not included in any selected campaign.");
             }
 
             claim.setCampaigns(campaigns);
@@ -95,29 +110,29 @@ public class WarrantyClaimService {
      */
     public WarrantyClaimResponse update(String id, WarrantyClaimRequest request) {
         WarrantyClaim existing = warrantyClaimRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Warranty claim not found: " + id));
 
         if (request.getClaimDate() != null)
             existing.setClaimDate(request.getClaimDate());
 
-        if (request.getDescription() != null)
+        if (request.getDescription() != null && !request.getDescription().trim().isEmpty())
             existing.setDescription(request.getDescription());
 
         if (request.getVin() != null) {
             Vehicle vehicle = vehicleRepository.findById(request.getVin())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe: " + request.getVin()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVin()));
             existing.setVehicle(vehicle);
         }
 
         if (request.getScStaffId() != null) {
             Account staff = accountRepository.findById(request.getScStaffId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy SC Staff: " + request.getScStaffId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Service center staff not found: " + request.getScStaffId()));
             existing.setServiceCenterStaff(staff);
         }
 
         if (request.getScTechnicianId() != null) {
             Account tech = accountRepository.findById(request.getScTechnicianId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Technician: " + request.getScTechnicianId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Technician not found: " + request.getScTechnicianId()));
             existing.setServiceCenterTechnician(tech);
         }
 
@@ -130,7 +145,7 @@ public class WarrantyClaimService {
      */
     public void delete(String id) {
         if (!warrantyClaimRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + id);
+            throw new ResourceNotFoundException("Warranty claim not found: " + id);
         }
         warrantyClaimRepository.deleteById(id);
     }
@@ -149,7 +164,7 @@ public class WarrantyClaimService {
      */
     public WarrantyClaimResponse getById(String id) {
         WarrantyClaim claim = warrantyClaimRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Warranty claim not found: " + id));
         return mapToResponse(claim);
     }
 
