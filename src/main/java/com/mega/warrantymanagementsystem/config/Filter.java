@@ -45,7 +45,9 @@ public class Filter extends OncePerRequestFilter {
 //                "DELETE:/api/accounts/**",
 //                "PUT:/api/accounts/**",
             "POST:/api/auth/register",
-            "POST:/api/auth/login"
+            "POST:/api/auth/login",
+            "POST:/api/full-auto-accounts/register",
+            "POST:/api/auto-accounts/register"
     );
 
     public boolean isPublicAPI(String uri, String method) {
