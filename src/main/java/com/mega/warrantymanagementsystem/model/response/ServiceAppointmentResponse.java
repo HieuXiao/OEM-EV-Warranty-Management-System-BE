@@ -10,6 +10,7 @@ public class ServiceAppointmentResponse {
     private int appointmentId;
     private LocalDate date;
     private String description;
+    private String status;
     private VehicleResponse vehicle;
     private CampaignResponse campaign;
 }
