@@ -75,6 +75,17 @@ public class ClaimWorkflowController {
         return ResponseEntity.ok(claimWorkflowService.scStaffSkipEvmAndHandover(claimId, staffId));
     }
 
+    /**
+     * EVM staff quyết định chuyển trực tiếp từ DECIDE → HANDOVER (có thể kèm mô tả).
+     */
+    @PostMapping("/{claimId}/evm/decision-handover")
+    public ResponseEntity<WarrantyClaimResponse> evmDecisionToHandover(
+            @PathVariable String claimId,
+            @RequestParam String evmId,
+            @RequestParam(required = false) String description) {
+        return ResponseEntity.ok(claimWorkflowService.evmDecisionToHandover(claimId, evmId, description));
+    }
+
 
 
 }
