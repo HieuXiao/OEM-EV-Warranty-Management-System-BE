@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "campaign")
@@ -38,4 +39,8 @@ public class Campaign {
     )
     @Column(name = "model")
     private java.util.List<String> model;
+
+    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<CampaignReport> campaignReports;
 }

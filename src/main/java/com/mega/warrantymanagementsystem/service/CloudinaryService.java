@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,4 +44,28 @@ public class CloudinaryService {
             e.printStackTrace();
         }
     }
+
+    public Map uploadFileWithResult(MultipartFile file, String folder) {
+        try {
+            Map uploadParams = ObjectUtils.asMap(
+                    "folder", folder,
+                    "resource_type", "auto"
+            );
+            return cloudinary.uploader().upload(file.getBytes(), uploadParams);
+        } catch (IOException e) {
+            throw new RuntimeException("Upload to Cloudinary failed: " + e.getMessage());
+        }
+    }
+    private void validatePdfFiles(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            String ct = file.getContentType();
+            String name = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            boolean ok = "application/pdf".equals(ct) || "application/octet-stream".equals(ct) || name.endsWith(".pdf");
+            if (!ok) {
+                throw new BusinessLogicException("Chỉ được phép upload file PDF, file '" + file.getOriginalFilename() + "' không hợp lệ.");
+            }
+        }
+    }
+
+
 }
