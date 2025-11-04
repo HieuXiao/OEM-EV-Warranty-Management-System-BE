@@ -71,6 +71,9 @@ public class Account implements UserDetails {
     @JoinColumn(name = "center_id") // Khóa ngoại trỏ đến bảng service_center
     private ServiceCenter serviceCenter;
 
+    @ManyToMany(mappedBy = "submittedBy")
+    private List<CampaignReport> submittedReports;
+
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 

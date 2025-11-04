@@ -28,5 +28,6 @@ public class ServiceCenter {
     @NotEmpty(message = "location cannot be empty")
     private String location;
 
-
+    @OneToMany(mappedBy = "serviceCenter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CampaignReport> campaignReports;
 }
