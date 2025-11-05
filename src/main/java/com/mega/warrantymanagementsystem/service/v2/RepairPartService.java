@@ -44,10 +44,9 @@ public class RepairPartService {
             part.setQuantity(Math.max(newQty, 0));
             partRepository.save(part);
 
-            syncLowParts(part.getWarehouse()); // <-- thêm dòng này
+            syncLowParts(part.getWarehouse()); // đồng bộ tự động
         }
     }
-
 
     // ==================== BỔ SUNG SỐ LƯỢNG PART ====================
     @Transactional
@@ -55,7 +54,6 @@ public class RepairPartService {
         Part part = partRepository.findByPartNumber(partNumber);
 
         if (part == null) {
-            // nếu chưa có → tạo mới luôn
             Warehouse warehouse = warehouseRepository.findAll().stream().findFirst()
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kho nào trong hệ thống"));
 
@@ -71,19 +69,7 @@ public class RepairPartService {
             partRepository.save(part);
         }
 
-        // Sau khi bổ sung quantity, nếu > 50 thì loại khỏi danh sách lowPart
-        Warehouse warehouse = part.getWarehouse();
-        if (warehouse != null) {
-            List<String> lowParts = warehouse.getLowPart();
-            if (lowParts != null && !lowParts.isEmpty()) {
-                if (part.getQuantity() > 50 && lowParts.contains(part.getPartNumber())) {
-                    lowParts.remove(part.getPartNumber());
-                    warehouse.setLowPart(lowParts);
-                    warehouseRepository.save(warehouse);
-                }
-            }
-        }
-
+        syncLowParts(part.getWarehouse()); // cập nhật danh sách lowParts đồng bộ
 
         PartResponse response = new PartResponse();
         response.setPartNumber(part.getPartNumber());
@@ -92,10 +78,15 @@ public class RepairPartService {
         response.setPrice(part.getPrice());
         return response;
     }
+
+    // ==================== ĐỒNG BỘ LOW PART ====================
     private void syncLowParts(Warehouse warehouse) {
         if (warehouse == null) return;
 
-        List<String> updatedLowParts = warehouse.getParts().stream()
+        List<Part> parts = warehouse.getParts();
+        if (parts == null) parts = List.of();
+
+        List<String> updatedLowParts = parts.stream()
                 .filter(p -> p.getQuantity() <= 50)
                 .map(Part::getPartNumber)
                 .toList();
