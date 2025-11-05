@@ -47,12 +47,15 @@ public class CloudinaryService {
 
     public Map uploadFileWithResult(MultipartFile file, String folder) {
         try {
-            String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
-            boolean isPdf = filename.endsWith(".pdf");
+            String originalName = Optional.ofNullable(file.getOriginalFilename())
+                    .orElse("unnamed.pdf");
+            String cleanName = originalName.replaceAll("\\s+", "_"); // bỏ khoảng trắng
 
+            boolean isPdf = cleanName.toLowerCase().endsWith(".pdf");
             Map uploadParams = ObjectUtils.asMap(
                     "folder", folder,
-                    "resource_type", isPdf ? "raw" : "auto"
+                    "resource_type", isPdf ? "raw" : "auto",
+                    "public_id", cleanName  // quan trọng: giữ tên file gốc
             );
 
             return cloudinary.uploader().upload(file.getBytes(), uploadParams);
@@ -60,6 +63,7 @@ public class CloudinaryService {
             throw new RuntimeException("Upload to Cloudinary failed: " + e.getMessage());
         }
     }
+
 
     private void validatePdfFiles(List<MultipartFile> files) {
         for (MultipartFile file : files) {
