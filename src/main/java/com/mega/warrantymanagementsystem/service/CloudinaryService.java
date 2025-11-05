@@ -47,15 +47,20 @@ public class CloudinaryService {
 
     public Map uploadFileWithResult(MultipartFile file, String folder) {
         try {
+            String filename = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+            boolean isPdf = filename.endsWith(".pdf");
+
             Map uploadParams = ObjectUtils.asMap(
                     "folder", folder,
-                    "resource_type", "auto"
+                    "resource_type", isPdf ? "raw" : "auto"
             );
+
             return cloudinary.uploader().upload(file.getBytes(), uploadParams);
         } catch (IOException e) {
             throw new RuntimeException("Upload to Cloudinary failed: " + e.getMessage());
         }
     }
+
     private void validatePdfFiles(List<MultipartFile> files) {
         for (MultipartFile file : files) {
             String ct = file.getContentType();
