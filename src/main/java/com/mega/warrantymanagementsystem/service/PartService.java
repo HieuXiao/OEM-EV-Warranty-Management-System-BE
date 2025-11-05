@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ public class PartService {
         return toResponse(part);
     }
 
+    // ================= CREATE =================
     public PartResponse createPart(PartRequest request) {
         if (partRepository.existsByPartNumber(request.getPartNumber())) {
             throw new DuplicateResourceException("Part already exists: " + request.getPartNumber());
@@ -53,9 +55,24 @@ public class PartService {
         part.setPrice(request.getPrice());
         part.setWarehouse(wh);
 
-        return toResponse(partRepository.save(part));
+        Part saved = partRepository.save(part);
+
+        // Nếu quantity < 50 → thêm vào danh sách lowPart của Warehouse
+        if (saved.getQuantity() < 50) {
+            List<String> lowParts = wh.getLowPart();
+            if (lowParts == null) lowParts = new ArrayList<>();
+
+            if (!lowParts.contains(saved.getPartNumber())) {
+                lowParts.add(saved.getPartNumber());
+                wh.setLowPart(lowParts);
+                warehouseRepository.save(wh);
+            }
+        }
+
+        return toResponse(saved);
     }
 
+    // ================= UPDATE =================
     public PartResponse updatePart(String partSerial, PartRequest request) {
         Part part = partRepository.findByPartNumber(partSerial);
         if (part == null)
@@ -81,6 +98,7 @@ public class PartService {
         return toResponse(partRepository.save(part));
     }
 
+    // ================= DELETE =================
     public void deletePart(String partNumber) {
         Part part = partRepository.findByPartNumber(partNumber);
         if (part == null)
@@ -88,6 +106,7 @@ public class PartService {
         partRepository.delete(part);
     }
 
+    // ================= RESPONSE MAPPER =================
     private PartResponse toResponse(Part part) {
         PartResponse resp = new PartResponse();
         resp.setPartNumber(part.getPartNumber());
