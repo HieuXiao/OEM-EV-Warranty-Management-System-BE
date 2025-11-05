@@ -57,7 +57,7 @@ public class PartService {
 
         Part saved = partRepository.save(part);
 
-        // Nếu quantity < 50 → thêm vào danh sách lowPart của Warehouse
+        // ⚙️ Nếu quantity < 50 → thêm vào danh sách lowPart của Warehouse
         if (saved.getQuantity() < 50) {
             List<String> lowParts = wh.getLowPart();
             if (lowParts == null) lowParts = new ArrayList<>();

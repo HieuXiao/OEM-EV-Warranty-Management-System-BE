@@ -2,6 +2,7 @@ package com.mega.warrantymanagementsystem.controller;
 
 import com.mega.warrantymanagementsystem.entity.Account;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
+import com.mega.warrantymanagementsystem.model.request.ChangePasswordRequest;
 import com.mega.warrantymanagementsystem.model.request.UpdateRequest;
 import com.mega.warrantymanagementsystem.model.response.AccountResponse;
 import com.mega.warrantymanagementsystem.service.AccountService;
@@ -80,6 +81,15 @@ public class AccountController {
             @PathVariable String accountId,
             @PathVariable int newCenterId) {
         String result = accountService.changeServiceCenterForAccount(accountId, newCenterId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{accountId}/change-password")
+    public ResponseEntity<String> changePassword(
+            @PathVariable String accountId,
+            @RequestBody ChangePasswordRequest request) {
+
+        String result = accountService.updatePassword(accountId, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok(result);
     }
 

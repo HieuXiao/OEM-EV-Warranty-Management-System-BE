@@ -4,6 +4,7 @@ import com.mega.warrantymanagementsystem.entity.Account;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.model.request.AccountRequest;
 import com.mega.warrantymanagementsystem.model.request.LoginRequest;
+import com.mega.warrantymanagementsystem.model.request.UpdatePasswordRequest;
 import com.mega.warrantymanagementsystem.model.response.AccountResponse;
 import com.mega.warrantymanagementsystem.service.AccountService;
 import com.mega.warrantymanagementsystem.service.TokenService;
@@ -59,4 +60,21 @@ public class AuthController {
         AccountResponse account = accountService.login(loginRequest);
         return ResponseEntity.ok(account);
     }
+
+    // đăng kí forgot password
+    // B1: gửi một cái mail xác nhận
+    // link update passwork => không ai cũng dùng được
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@RequestParam String email){
+        accountService.resetPassword(email);
+    }
+
+    //update password
+    @PostMapping("/update-password")
+    public ResponseEntity<AccountResponse> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        AccountResponse response = accountService.updateForgotPassword(updatePasswordRequest);
+        return ResponseEntity.ok(response);
+    }
+
 }

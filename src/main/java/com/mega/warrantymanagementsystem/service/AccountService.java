@@ -5,6 +5,8 @@ import com.mega.warrantymanagementsystem.entity.Account;
 import com.mega.warrantymanagementsystem.entity.Role;
 import com.mega.warrantymanagementsystem.entity.ServiceCenter;
 import com.mega.warrantymanagementsystem.entity.entity.RoleName;
+import com.mega.warrantymanagementsystem.model.EmailDetail;
+import com.mega.warrantymanagementsystem.model.request.UpdatePasswordRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.AccountRequest;
@@ -54,6 +56,9 @@ public class AccountService implements UserDetailsService {
 
     @Autowired
     TokenService tokenService;
+
+    @Autowired
+    EmailService emailService;
 
 
     public AccountResponse findByUsername(String username) {
@@ -229,6 +234,23 @@ public class AccountService implements UserDetailsService {
         return mapToResponse(accountRepository.save(account));
     }
 
+    @Transactional
+    public String updatePassword(String accountId, String oldPassword, String newPassword) {
+        Account account = accountRepository.findById(accountId.toUpperCase())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        // Kiểm tra mật khẩu cũ
+        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
+            throw new BadCredentialsException("Old password is incorrect");
+        }
+
+        // Mã hóa và cập nhật mật khẩu mới
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+
+        return "Password updated successfully for account " + accountId;
+    }
+
     private AccountResponse mapToResponse(Account account) {
         AccountResponse res = new AccountResponse();
         res.setAccountId(account.getAccountId());
@@ -328,4 +350,38 @@ public class AccountService implements UserDetailsService {
 
         return "service center changed successfully for account " + accountId;
     }
+
+    //forgot password
+    public void resetPassword(String email) {
+
+        Account account = accountRepository.findByEmail(email);
+        String token = tokenService.generateToken(account);
+        String url = "http://localhost:5173/reset-password?token="+token;
+
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setSubject("Rest password");
+        emailDetail.setRecipient(account.getEmail());
+        emailDetail.setFullName(account.getFullName());
+        emailDetail.setUrl(url);
+
+        emailService.sendMailTemplate(emailDetail,"forgot-password.html");
+    }
+
+    @Transactional
+    public AccountResponse updateForgotPassword(UpdatePasswordRequest updatePasswordRequest) {
+        // Lấy người dùng hiện tại từ SecurityContext (token trong Authorization)
+        Account currentAccount = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Tìm lại bản ghi thật trong DB
+        Account account = accountRepository.findById(currentAccount.getAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+        // Cập nhật mật khẩu mới
+        account.setPassword(passwordEncoder.encode(updatePasswordRequest.getPassword()));
+        accountRepository.save(account);
+
+        return mapToResponse(account);
+    }
+
+
 }

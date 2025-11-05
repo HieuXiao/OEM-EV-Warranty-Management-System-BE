@@ -115,5 +115,4 @@ public class RepairPartService {
         warehouse.setLowPart(new java.util.ArrayList<>(updatedLowParts));
         warehouseRepository.save(warehouse);
     }
-
 }
