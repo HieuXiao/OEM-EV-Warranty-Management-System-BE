@@ -20,9 +20,9 @@ public class CampaignReportResponse {
 
     private LocalDateTime submittedAt;
 
-    private Integer campaignId;
+    private CampaignResponse campaignId;
 
-    private Integer serviceCenterId;
+    private ServiceCenterResponse serviceCenterId;
 
     private List<String> submittedByIds;
 

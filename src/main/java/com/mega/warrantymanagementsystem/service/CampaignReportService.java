@@ -5,6 +5,8 @@ import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicExcept
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.CampaignReportRequest;
 import com.mega.warrantymanagementsystem.model.response.CampaignReportResponse;
+import com.mega.warrantymanagementsystem.model.response.CampaignResponse;
+import com.mega.warrantymanagementsystem.model.response.ServiceCenterResponse;
 import com.mega.warrantymanagementsystem.repository.*;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -191,13 +193,28 @@ public class CampaignReportService {
 
     // ==================== MAPPER ====================
     private CampaignReportResponse mapToResponse(CampaignReport report) {
-        CampaignReportResponse response = modelMapper.map(report, CampaignReportResponse.class);
-        response.setCampaignId(report.getCampaign().getCampaignId());
-        response.setServiceCenterId(report.getServiceCenter().getCenterId());
-        response.setSubmittedByIds(report.getSubmittedBy()
-                .stream()
-                .map(Account::getAccountId)
-                .collect(Collectors.toList()));
+        CampaignReportResponse response = new CampaignReportResponse();
+
+        // map cơ bản
+        response.setReportId(report.getReportId());
+        response.setReportFileUrls(report.getReportFileUrls());
+        response.setOriginalFileName(report.getOriginalFileName());
+        response.setSubmittedAt(report.getSubmittedAt());
+
+        // map object thay vì id
+        response.setCampaignId(modelMapper.map(report.getCampaign(), CampaignResponse.class));
+        response.setServiceCenterId(modelMapper.map(report.getServiceCenter(), ServiceCenterResponse.class));
+
+        // map danh sách accountId
+        if (report.getSubmittedBy() != null) {
+            response.setSubmittedByIds(
+                    report.getSubmittedBy()
+                            .stream()
+                            .map(Account::getAccountId)
+                            .collect(Collectors.toList())
+            );
+        }
+
         return response;
     }
 
