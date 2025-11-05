@@ -41,24 +41,13 @@ public class RepairPartService {
             }
 
             int newQty = part.getQuantity() - check.getQuantity();
-            part.setQuantity(Math.max(newQty, 0)); // không cho âm
+            part.setQuantity(Math.max(newQty, 0));
             partRepository.save(part);
 
-            // Nếu số lượng <= 50 thì thêm vào danh sách lowPart của kho
-            Warehouse warehouse = part.getWarehouse();
-            if (warehouse != null && newQty <= 50) {
-                List<String> lowParts = warehouse.getLowPart();
-                if (lowParts == null) {
-                    lowParts = new java.util.ArrayList<>();
-                }
-                if (!lowParts.contains(part.getPartNumber())) {
-                    lowParts.add(part.getPartNumber());
-                    warehouse.setLowPart(lowParts);
-                    warehouseRepository.save(warehouse);
-                }
-            }
+            syncLowParts(part.getWarehouse()); // <-- thêm dòng này
         }
     }
+
 
     // ==================== BỔ SUNG SỐ LƯỢNG PART ====================
     @Transactional
@@ -103,4 +92,16 @@ public class RepairPartService {
         response.setPrice(part.getPrice());
         return response;
     }
+    private void syncLowParts(Warehouse warehouse) {
+        if (warehouse == null) return;
+
+        List<String> updatedLowParts = warehouse.getParts().stream()
+                .filter(p -> p.getQuantity() <= 50)
+                .map(Part::getPartNumber)
+                .toList();
+
+        warehouse.setLowPart(new java.util.ArrayList<>(updatedLowParts));
+        warehouseRepository.save(warehouse);
+    }
+
 }
