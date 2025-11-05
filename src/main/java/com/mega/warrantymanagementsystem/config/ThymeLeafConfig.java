@@ -11,19 +11,20 @@ public class ThymeLeafConfig {
 
     @Bean
     public ClassLoaderTemplateResolver templateResolver() {
-        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setPrefix("classpath:/templates/"); // classpath bắt buộc khi build JAR
-        templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode(TemplateMode.HTML);
-        templateResolver.setCharacterEncoding("UTF-8");
-        templateResolver.setCacheable(false);
-        return templateResolver;
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("/templates/");  // bỏ "classpath:" đi, Thymeleaf tự hiểu khi chạy JAR
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode(TemplateMode.HTML);
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setCacheable(false);
+        return resolver;
     }
 
     @Bean
     public TemplateEngine templateEngine() {
-        TemplateEngine templateEngine = new TemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver());
-        return templateEngine;
+        TemplateEngine engine = new TemplateEngine();
+        engine.setTemplateResolver(templateResolver());
+        return engine;
     }
 }
+
