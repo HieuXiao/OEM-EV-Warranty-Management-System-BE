@@ -23,12 +23,13 @@ public class RepairPartController {
         return ResponseEntity.ok("Parts updated successfully for claim " + warrantyId);
     }
 
-    // API bổ sung Part quantity (kể cả part chưa tồn tại)
+    // API bổ sung Part quantity cho warehouse cụ thể
     @PatchMapping("/add-quantity")
     public ResponseEntity<PartResponse> addQuantity(
             @RequestParam String partNumber,
-            @RequestParam int quantity
+            @RequestParam int quantity,
+            @RequestParam int warehouseId
     ) {
-        return ResponseEntity.ok(repairPartService.addQuantity(partNumber, quantity));
+        return ResponseEntity.ok(repairPartService.addQuantity(partNumber, quantity, warehouseId));
     }
 }

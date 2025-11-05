@@ -44,19 +44,25 @@ public class RepairPartService {
             part.setQuantity(Math.max(newQty, 0));
             partRepository.save(part);
 
-            syncLowParts(part.getWarehouse()); // đồng bộ tự động
+            syncLowParts(part.getWarehouse());
         }
     }
 
-    // ==================== BỔ SUNG SỐ LƯỢNG PART ====================
+    // ==================== BỔ SUNG SỐ LƯỢNG PART (CÓ WAREHOUSE) ====================
     @Transactional
-    public PartResponse addQuantity(String partNumber, int quantity) {
-        Part part = partRepository.findByPartNumber(partNumber);
+    public PartResponse addQuantity(String partNumber, int quantity, int warehouseId) {
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse với ID: " + warehouseId));
+
+        Part part = partRepository.findAll().stream()
+                .filter(p -> p.getPartNumber().equals(partNumber) &&
+                        p.getWarehouse() != null &&
+                        p.getWarehouse().getWhId() == warehouseId)
+                .findFirst()
+                .orElse(null);
 
         if (part == null) {
-            Warehouse warehouse = warehouseRepository.findAll().stream().findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kho nào trong hệ thống"));
-
+            // Nếu chưa tồn tại part đó trong warehouse này → tạo mới
             part = new Part();
             part.setPartNumber(partNumber);
             part.setNamePart(partNumber);
@@ -64,12 +70,27 @@ public class RepairPartService {
             part.setPrice(0);
             part.setWarehouse(warehouse);
             partRepository.save(part);
+
+            // Nếu nhỏ hơn hoặc bằng 50 thì thêm luôn vào danh sách lowPart của warehouse
+            if (quantity <= 50) {
+                List<String> lowParts = warehouse.getLowPart();
+                if (lowParts == null) {
+                    lowParts = new java.util.ArrayList<>();
+                }
+                if (!lowParts.contains(partNumber)) {
+                    lowParts.add(partNumber);
+                    warehouse.setLowPart(lowParts);
+                    warehouseRepository.save(warehouse);
+                }
+            }
         } else {
+            // Nếu part đã tồn tại → cộng thêm số lượng
             part.setQuantity(part.getQuantity() + quantity);
             partRepository.save(part);
-        }
 
-        syncLowParts(part.getWarehouse()); // cập nhật danh sách lowParts đồng bộ
+            // Cập nhật lại danh sách low part cho warehouse này
+            syncLowParts(warehouse);
+        }
 
         PartResponse response = new PartResponse();
         response.setPartNumber(part.getPartNumber());
@@ -79,7 +100,7 @@ public class RepairPartService {
         return response;
     }
 
-    // ==================== ĐỒNG BỘ LOW PART ====================
+    // ==================== ĐỒNG BỘ LOW PART CHO KHO ====================
     private void syncLowParts(Warehouse warehouse) {
         if (warehouse == null) return;
 
