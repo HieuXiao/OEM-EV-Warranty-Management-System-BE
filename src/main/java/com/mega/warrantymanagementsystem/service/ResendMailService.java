@@ -15,6 +15,8 @@ public class ResendMailService {
     public void sendResetPasswordMail(String toEmail, String fullName, String resetUrl) {
         RestTemplate restTemplate = new RestTemplate();
 
+        //fix bung deploy
+        //6-11
         Map<String, Object> body = new HashMap<>();
         body.put("from", "onboarding@resend.dev"); // địa chỉ đã verify trong Resend
         body.put("to", List.of(toEmail));
