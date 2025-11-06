@@ -57,8 +57,11 @@ public class AccountService implements UserDetailsService {
     @Autowired
     TokenService tokenService;
 
+//    @Autowired
+//    EmailService emailService;
+
     @Autowired
-    EmailService emailService;
+    ResendMailService resendMailService;
 
 
     public AccountResponse findByUsername(String username) {
@@ -352,20 +355,34 @@ public class AccountService implements UserDetailsService {
     }
 
     //forgot password
+//    public void resetPassword(String email) {
+//
+//        Account account = accountRepository.findByEmail(email);
+//        String token = tokenService.generateToken(account);
+//        String url = "http://localhost:5173/reset-password?token="+token;
+//
+//        EmailDetail emailDetail = new EmailDetail();
+//        emailDetail.setSubject("Rest password");
+//        emailDetail.setRecipient(account.getEmail());
+//        emailDetail.setFullName(account.getFullName());
+//        emailDetail.setUrl(url);
+//
+//        emailService.sendMailTemplate(emailDetail,"forgot-password.html");
+//    }
+
     public void resetPassword(String email) {
-
         Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            throw new RuntimeException("Email not registered");
+        }
+
         String token = tokenService.generateToken(account);
-        String url = "http://localhost:5173/reset-password?token="+token;
+        String url = "http://localhost:5173/reset-password?token=" + token;
 
-        EmailDetail emailDetail = new EmailDetail();
-        emailDetail.setSubject("Rest password");
-        emailDetail.setRecipient(account.getEmail());
-        emailDetail.setFullName(account.getFullName());
-        emailDetail.setUrl(url);
-
-        emailService.sendMailTemplate(emailDetail,"forgot-password.html");
+        // gửi mail qua Resend
+        resendMailService.sendResetPasswordMail(account.getEmail(), account.getFullName(), url);
     }
+
 
     @Transactional
     public AccountResponse updateForgotPassword(UpdatePasswordRequest updatePasswordRequest) {

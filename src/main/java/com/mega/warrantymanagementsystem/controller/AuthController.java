@@ -11,6 +11,7 @@ import com.mega.warrantymanagementsystem.service.TokenService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -66,8 +67,13 @@ public class AuthController {
     // link update passwork => không ai cũng dùng được
 
     @PostMapping("/reset-password")
-    public void resetPassword(@RequestParam String email){
-        accountService.resetPassword(email);
+    public ResponseEntity<String> resetPassword(@RequestParam String email){
+        try {
+            accountService.resetPassword(email);
+            return ResponseEntity.ok("Reset password email sent");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     //update password
