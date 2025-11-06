@@ -9,20 +9,22 @@ import java.util.*;
 @Service
 public class ResendMailService {
 
-    private final String API_KEY = "re_FRMu2e5d_Jnrxn7i2x4qbzms7tp9wdymF";
-    private final String URL = "https://api.resend.com/emails";
+    private static final String API_KEY = "re_FRMu2e5d_Jnrxn7i2x4qbzms7tp9wdymF";
+    private static final String URL = "https://api.resend.com/emails";
 
     public void sendResetPasswordMail(String toEmail, String fullName, String resetUrl) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // tạo body JSON
         Map<String, Object> body = new HashMap<>();
-        body.put("from", "onboarding@resend.dev"); // email đã xác thực trên Resend
+        body.put("from", "onboarding@resend.dev"); // địa chỉ đã verify trong Resend
         body.put("to", List.of(toEmail));
         body.put("subject", "Reset your password");
-        body.put("html", "<p>Hi " + fullName + ",</p>"
-                + "<p>You requested to reset your password. Click the link below:</p>"
-                + "<p><a href='" + resetUrl + "'>Reset password</a></p>");
+        body.put("html",
+                "<p>Xin chào " + fullName + ",</p>"
+                        + "<p>Bạn vừa yêu cầu đặt lại mật khẩu. Nhấn vào liên kết dưới đây để đặt lại:</p>"
+                        + "<p><a href='" + resetUrl + "'>Đặt lại mật khẩu</a></p>"
+                        + "<p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>"
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -32,9 +34,9 @@ public class ResendMailService {
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(URL, request, String.class);
-            System.out.println("Email sent. Response: " + response.getBody());
+            System.out.println("Email sent successfully. Response: " + response.getBody());
         } catch (Exception e) {
-            System.err.println("Failed to send reset password email: " + e.getMessage());
+            System.err.println("Failed to send email: " + e.getMessage());
         }
     }
 }
