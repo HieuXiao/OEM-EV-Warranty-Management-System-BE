@@ -15,14 +15,40 @@ public class ResendMailService {
     public void sendResetPasswordMail(String toEmail, String fullName, String resetUrl) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // tạo body JSON
         Map<String, Object> body = new HashMap<>();
-        body.put("from", "onboarding@resend.dev"); // email đã xác thực trên Resend
+        body.put("from", "onboarding@resend.dev"); // dùng email mặc định test
         body.put("to", List.of(toEmail));
         body.put("subject", "Reset your password");
-        body.put("html", "<p>Hi " + fullName + ",</p>"
-                + "<p>You requested to reset your password. Click the link below:</p>"
-                + "<p><a href='" + resetUrl + "'>Reset password</a></p>");
+
+        // HTML ngắn, an toàn, vẫn giữ phong cách
+        String htmlTemplate = """
+        <html lang="en" style="margin:0; padding:0;">
+        <head>
+            <meta charset="utf-8">
+            <title>Password Reset</title>
+            <style>
+                .btn { background:#007bff; color:#ffffff; padding:10px 16px; border-radius:6px; text-decoration:none; display:inline-block; font-weight:700; }
+            </style>
+        </head>
+        <body style="margin:0; padding:0; background:#f6f6f6; font-family:Arial,sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td align="center">
+        <table width="600" style="background:#ffffff; border-radius:8px; padding:20px;">
+        <tr><td>
+        <p>Hello <strong>%s</strong>,</p>
+        <p>We received a request to reset your password.</p>
+        <p><a href="%s" class="btn">Reset Password</a></p>
+        <p>If you did not request this, ignore this email.</p>
+        </td></tr>
+        </table>
+        </td></tr>
+        </table>
+        </body>
+        </html>
+        """;
+
+        String html = htmlTemplate.formatted(fullName, resetUrl);
+        body.put("html", html);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
