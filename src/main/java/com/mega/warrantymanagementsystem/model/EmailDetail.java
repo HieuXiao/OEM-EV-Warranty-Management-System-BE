@@ -9,4 +9,7 @@ public class EmailDetail {
     String fullName;
     String url;
     String campaignName;
+    private String modelName;      // Tên mẫu xe
+    private String startDate;      // Ngày bắt đầu chiến dịch
+    private String endDate;        // Ngày kết thúc chiến dịch
 }
