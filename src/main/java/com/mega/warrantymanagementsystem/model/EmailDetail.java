@@ -9,4 +9,5 @@ public class EmailDetail {
     String fullName;
     String url;
     String campaignName;
+
 }
