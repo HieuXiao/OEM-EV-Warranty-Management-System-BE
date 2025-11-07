@@ -100,7 +100,6 @@ public class ClaimWorkflowService {
         // Khi EVM điền description => chuyển DECIDE -> REPAIR
         claim.setStatus(WarrantyClaimStatus.REPAIR);
 
-        warrantyClaimRepository.save(claim);
 
         repairPartService.handleRepairParts(claimId);
 
