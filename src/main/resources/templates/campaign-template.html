@@ -3,33 +3,33 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Official Campaign Notice</title>
+    <title>Official Service Campaign Notification</title>
     <style>
         body {
           margin: 0;
           padding: 0;
-          background-color: #f7f9fb;
+          background-color: #f8f9fb;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           color: #333333;
         }
         .container {
-          max-width: 640px;
-          margin: 32px auto;
+          max-width: 680px;
+          margin: 40px auto;
           background-color: #ffffff;
           border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
           overflow: hidden;
         }
         .header {
-          background-color: #0a2342;
+          background-color: #1a2b4c;
           color: #ffffff;
           text-align: center;
-          padding: 36px 20px;
+          padding: 40px 20px;
         }
         .header h1 {
           margin: 0;
-          font-size: 24px;
-          letter-spacing: 0.5px;
+          font-size: 26px;
+          letter-spacing: 0.6px;
         }
         .header p {
           margin-top: 8px;
@@ -37,33 +37,40 @@
           opacity: 0.9;
         }
         .content {
-          padding: 36px 28px;
-          line-height: 1.7;
+          padding: 40px 32px;
+          line-height: 1.8;
           font-size: 16px;
         }
         .content strong {
-          color: #0a2342;
+          color: #1a2b4c;
+        }
+        .campaign-info {
+          margin-top: 20px;
+          background-color: #f1f4f8;
+          padding: 15px 20px;
+          border-radius: 8px;
+          font-size: 15px;
         }
         .button {
           display: inline-block;
-          background-color: #0a2342;
+          background-color: #1a2b4c;
           color: #ffffff !important;
-          padding: 12px 22px;
+          padding: 12px 26px;
           border-radius: 8px;
           text-decoration: none;
           font-weight: 600;
           font-size: 15px;
-          margin-top: 20px;
+          margin-top: 25px;
         }
         .footer {
           background-color: #f1f4f8;
           text-align: center;
-          padding: 20px 12px;
+          padding: 24px 14px;
           font-size: 13px;
           color: #777777;
         }
         .footer a {
-          color: #0a2342;
+          color: #1a2b4c;
           text-decoration: none;
         }
         .footer a:hover {
@@ -76,36 +83,47 @@
 <div class="container">
     <div class="header">
         <h1>MEGATEMA Service Center</h1>
-        <p>Official Notice of [[${campaign}]]</p>
+        <p>Official Notification – [[${campaign}]]</p>
     </div>
 
     <div class="content">
         <p>Dear <strong>[[${name}]]</strong>,</p>
+
         <p>
-            We sincerely hope this message finds you well. We would like to inform you that <strong>MEGATEMA</strong> is
-            currently conducting a special campaign: <strong>[[${campaign}]]</strong>.
+            We are pleased to inform you that <strong>MEGATEMA</strong> has initiated a special service campaign
+            for your vehicle model <strong>[[${model}]]</strong>. This program aims to ensure the continued safety,
+            performance, and reliability of your vehicle.
         </p>
+
+        <div class="campaign-info">
+            <p><strong>Campaign Name:</strong> [[${campaign}]]</p>
+            <p><strong>Applicable Model:</strong> [[${model}]]</p>
+            <p><strong>Start Date:</strong> [[${startDate}]]</p>
+            <p><strong>End Date:</strong> [[${endDate}]]</p>
+        </div>
+
         <p>
-            This initiative is part of our ongoing commitment to ensure that your vehicle continues to perform at the
-            highest safety and reliability standards. We invite you to review your eligibility and schedule your
-            complimentary service appointment.
+            We kindly invite you to visit the link below for more details and to schedule your
+            complimentary service appointment at your convenience.
         </p>
 
         <a href="[[${url}]]" class="button">View Campaign Details</a>
 
         <p style="margin-top: 30px;">
-            Should you have any questions, please contact our customer care team or visit your nearest MEGATEMA service
-            center. We are always ready to assist you with professionalism and care.
+            Should you have any questions, please do not hesitate to contact our Customer Relations Department
+            or visit your nearest authorized MEGATEMA Service Center.
         </p>
 
-        <p style="margin-top: 30px;">Warm regards,<br />
-            <strong>MEGATEMA Customer Relations Department</strong></p>
+        <p style="margin-top: 30px;">
+            With best regards,<br/>
+            <strong>MEGATEMA Customer Relations Department</strong>
+        </p>
     </div>
 
     <div class="footer">
         <p>
-            © 2025 MEGATEMA Service Center<br />
-            456 Main Avenue, Downtown District, Ho Chi Minh City<br />
+            © 2025 MEGATEMA Service Center<br/>
+            456 Main Avenue, Downtown District, Ho Chi Minh City<br/>
             <a href="https://example.com/unsubscribe">Unsubscribe</a> •
             <a href="https://example.com/privacy">Privacy Policy</a>
         </p>
