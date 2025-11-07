@@ -67,13 +67,8 @@ public class AuthController {
     // link update passwork => không ai cũng dùng được
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String email){
-        try {
-            accountService.resetPassword(email);
-            return ResponseEntity.ok("Reset password email sent");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public void resetPassword(@RequestParam String email){
+        accountService.resetPassword(email);
     }
 
     //update password
