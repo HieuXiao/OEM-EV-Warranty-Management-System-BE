@@ -17,7 +17,7 @@ import java.util.List;
 public class ClaimPartCheck {
 
     @Id
-    @Column(name = "part_number", length = 17)
+    @Column(name = "part_number", length = 50)
     private String partNumber; // PK
 
     @ManyToOne(fetch = FetchType.LAZY)
