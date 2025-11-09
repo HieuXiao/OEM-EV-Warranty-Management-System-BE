@@ -78,15 +78,36 @@ public class PartService {
         return toResponse(part);
     }
 
+    @Transactional
     public PartResponse updatePart(String serial, PartRequest request) {
         Part part = partRepository.findById(serial)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part: " + serial));
 
+        // Cập nhật thông tin cơ bản
         part.setNamePart(request.getNamePart());
         part.setPrice(request.getPrice());
         partRepository.save(part);
+
+        // Cập nhật quantity trong warehouse tương ứng (nếu có)
+        if (request.getWhId() != null && request.getQuantity() >= 0) {
+            Warehouse warehouse = warehouseRepository.findById(request.getWhId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse ID: " + request.getWhId()));
+
+            WarehousePartId id = new WarehousePartId(serial, warehouse.getWhId());
+            WarehousePart wp = warehousePartRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part " + serial + " trong warehouse " + request.getWhId()));
+
+            // Cập nhật quantity
+            wp.setQuantity(request.getQuantity());
+            warehousePartRepository.save(wp);
+
+            // Đồng bộ trạng thái lowPart của warehouse
+            updateLowPartStatus(warehouse, wp);
+        }
+
         return toResponse(part);
     }
+
 
     @Transactional
     public void deletePart(String serial) {
