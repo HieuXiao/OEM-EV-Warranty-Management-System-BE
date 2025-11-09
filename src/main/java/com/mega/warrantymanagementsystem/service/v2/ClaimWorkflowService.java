@@ -101,7 +101,7 @@ public class ClaimWorkflowService {
         claim.setStatus(WarrantyClaimStatus.REPAIR);
 
 
-        repairPartService.handleRepairParts(claimId);
+        warrantyClaimRepository.save(claim);
 
         return mapToResponse(claim);
     }
