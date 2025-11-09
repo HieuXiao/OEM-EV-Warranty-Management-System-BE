@@ -1,20 +1,16 @@
 package com.mega.warrantymanagementsystem.service;
 
-import com.mega.warrantymanagementsystem.entity.Part;
-import com.mega.warrantymanagementsystem.entity.Warehouse;
-import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
+import com.mega.warrantymanagementsystem.entity.*;
+import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.PartRequest;
-import com.mega.warrantymanagementsystem.model.response.PartResponse;
-import com.mega.warrantymanagementsystem.model.response.WarehouseResponse;
-import com.mega.warrantymanagementsystem.repository.PartRepository;
-import com.mega.warrantymanagementsystem.repository.WarehouseRepository;
+import com.mega.warrantymanagementsystem.model.response.*;
+import com.mega.warrantymanagementsystem.repository.*;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,102 +22,118 @@ public class PartService {
     @Autowired
     private WarehouseRepository warehouseRepository;
 
+    @Autowired
+    private WarehousePartRepository warehousePartRepository;
+
+    @Autowired
+    private ModelMapper mapper;
+
+    private static final int LOW_THRESHOLD = 50;
+
+    @Transactional
+    public PartResponse createPart(PartRequest request) {
+        Warehouse warehouse = warehouseRepository.findById(request.getWhId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse với ID: " + request.getWhId()));
+
+        Part part = partRepository.findById(request.getPartNumber()).orElse(null);
+        if (part == null) {
+            part = new Part();
+            part.setPartNumber(request.getPartNumber());
+            part.setNamePart(request.getNamePart());
+            part.setPrice(request.getPrice());
+            part = partRepository.save(part);
+        }
+
+        WarehousePartId id = new WarehousePartId(request.getPartNumber(), warehouse.getWhId());
+        WarehousePart wp = warehousePartRepository.findById(id).orElse(null);
+
+        if (wp == null) {
+            wp = new WarehousePart();
+            wp.setId(id);
+            wp.setPart(part);
+            wp.setWarehouse(warehouse);
+            wp.setQuantity(request.getQuantity());
+            wp.setPrice(request.getPrice());
+        } else {
+            wp.setQuantity(wp.getQuantity() + request.getQuantity());
+        }
+
+        warehousePartRepository.save(wp);
+
+        // Cập nhật lowPart ngay lập tức
+        updateLowPartStatus(warehouse, wp);
+
+        return toResponse(part);
+    }
+
     public List<PartResponse> getAllParts() {
         return partRepository.findAll().stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public PartResponse getPartBySerial(String partSerial) {
-        Part part = partRepository.findByPartNumber(partSerial);
-        if (part == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
+    public PartResponse getPartBySerial(String serial) {
+        Part part = partRepository.findById(serial)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part: " + serial));
         return toResponse(part);
     }
 
-    // ================= CREATE =================
-    public PartResponse createPart(PartRequest request) {
-        if (partRepository.existsByPartNumber(request.getPartNumber())) {
-            throw new DuplicateResourceException("Part already exists: " + request.getPartNumber());
-        }
+    public PartResponse updatePart(String serial, PartRequest request) {
+        Part part = partRepository.findById(serial)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part: " + serial));
 
-        Warehouse wh = warehouseRepository.findById(request.getWhId())
-                .orElseThrow(() -> new DuplicateResourceException("Warehouse not found: " + request.getWhId()));
-
-        Part part = new Part();
-        part.setPartNumber(request.getPartNumber());
         part.setNamePart(request.getNamePart());
-        part.setQuantity(request.getQuantity());
         part.setPrice(request.getPrice());
-        part.setWarehouse(wh);
-
-        Part saved = partRepository.save(part);
-
-        // ⚙️ Nếu quantity < 50 → thêm vào danh sách lowPart của Warehouse
-        if (saved.getQuantity() < 50) {
-            List<String> lowParts = wh.getLowPart();
-            if (lowParts == null) lowParts = new ArrayList<>();
-
-            if (!lowParts.contains(saved.getPartNumber())) {
-                lowParts.add(saved.getPartNumber());
-                wh.setLowPart(lowParts);
-                warehouseRepository.save(wh);
-            }
-        }
-
-        return toResponse(saved);
+        partRepository.save(part);
+        return toResponse(part);
     }
 
-    // ================= UPDATE =================
-    public PartResponse updatePart(String partSerial, PartRequest request) {
-        Part part = partRepository.findByPartNumber(partSerial);
-        if (part == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partSerial);
-
-        if (request.getPartNumber() != null && !request.getPartNumber().equals(part.getPartNumber())) {
-            if (partRepository.existsByPartNumber(request.getPartNumber())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part number already exists: " + request.getPartNumber());
-            }
-            part.setPartNumber(request.getPartNumber());
-        }
-
-        if (request.getNamePart() != null) part.setNamePart(request.getNamePart());
-        part.setQuantity(request.getQuantity());
-        part.setPrice(request.getPrice());
-
-        if (request.getWhId() != null) {
-            Warehouse wh = warehouseRepository.findById(request.getWhId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse not found: " + request.getWhId()));
-            part.setWarehouse(wh);
-        }
-
-        return toResponse(partRepository.save(part));
+    @Transactional
+    public void deletePart(String serial) {
+        List<WarehousePart> list = warehousePartRepository.findByPart_PartNumber(serial);
+        warehousePartRepository.deleteAll(list);
+        partRepository.deleteById(serial);
     }
 
-    // ================= DELETE =================
-    public void deletePart(String partNumber) {
-        Part part = partRepository.findByPartNumber(partNumber);
-        if (part == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Part not found: " + partNumber);
-        partRepository.delete(part);
-    }
-
-    // ================= RESPONSE MAPPER =================
     private PartResponse toResponse(Part part) {
-        PartResponse resp = new PartResponse();
-        resp.setPartNumber(part.getPartNumber());
-        resp.setNamePart(part.getNamePart());
-        resp.setQuantity(part.getQuantity());
-        resp.setPrice(part.getPrice());
+        PartResponse resp = mapper.map(part, PartResponse.class);
+        List<WarehousePart> list = warehousePartRepository.findByPart_PartNumber(part.getPartNumber());
+        int total = list.stream().mapToInt(WarehousePart::getQuantity).sum();
+        resp.setTotalQuantity(total);
 
-        if (part.getWarehouse() != null) {
-            WarehouseResponse whResp = new WarehouseResponse();
-            whResp.setWhId(part.getWarehouse().getWhId());
-            whResp.setName(part.getWarehouse().getName());
-            whResp.setLocation(part.getWarehouse().getLocation());
-            resp.setWarehouse(whResp);
+        List<WarehouseResponse> warehouses = list.stream().map(wp -> {
+            WarehouseResponse wres = mapper.map(wp.getWarehouse(), WarehouseResponse.class);
+            PartInWarehouseDto dto = new PartInWarehouseDto();
+            dto.setPartNumber(part.getPartNumber());
+            dto.setNamePart(part.getNamePart());
+            dto.setQuantity(wp.getQuantity());
+            dto.setPrice(wp.getPrice());
+            wres.setParts(new ArrayList<>(List.of(dto)));
+            return wres;
+        }).collect(Collectors.toList());
+
+        resp.setWarehouses(warehouses);
+        return resp;
+    }
+
+    /**
+     * Cập nhật lowPart khi có thay đổi quantity:
+     * - Nếu <= 50 → thêm vào danh sách lowPart (nếu chưa có)
+     * - Nếu > 50 → xóa khỏi danh sách lowPart (nếu đang có)
+     */
+    public void updateLowPartStatus(Warehouse warehouse, WarehousePart wp) {
+        List<String> lowParts = new ArrayList<>(Optional.ofNullable(warehouse.getLowPart()).orElse(new ArrayList<>()));
+        String partNumber = wp.getPart().getPartNumber();
+
+        if (wp.getQuantity() <= LOW_THRESHOLD) {
+            if (!lowParts.contains(partNumber)) {
+                lowParts.add(partNumber);
+            }
+        } else {
+            lowParts.remove(partNumber);
         }
 
-        return resp;
+        warehouse.setLowPart(lowParts);
+        warehouseRepository.save(warehouse);
     }
 }

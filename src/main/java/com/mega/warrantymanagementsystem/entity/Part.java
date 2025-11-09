@@ -1,41 +1,36 @@
 package com.mega.warrantymanagementsystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Global Part entity. Does NOT store per-warehouse quantity.
+ * Per-warehouse quantities live in WarehousePart.
+ */
 @Entity
-@Data
 @Table(name = "part")
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Part {
 
-    //------------------Primary Key------------------------
     @Id
-    @Column(name = "part_number", length = 20)
-    @NotEmpty(message = "Part serial cannot be empty!")
+    @Column(name = "part_number", length = 50)
     private String partNumber;
 
-    //------------------Tên part------------------------
-    @Column(name = "name_part", nullable = false, length = 100)
-    @NotEmpty(message = "Part name cannot be empty!")
+    @Column(name = "name_part", nullable = false, length = 200)
     private String namePart;
 
-    //------------------Số lượng------------------------
-    @Column(name = "quantity")
-    private int quantity;
-
-    //------------------Giá------------------------
+    // optional default/global price
     @Column(name = "price")
-    private float price;
+    private Float price;
 
-    //------------------Liên kết warehouse------------------------
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "whId", nullable = false)
-    @JsonIgnore
-    private Warehouse warehouse;
+    // OneToMany to WarehousePart for convenience (mappedBy = "part")
+    @OneToMany(mappedBy = "part", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WarehousePart> inventories = new ArrayList<>();
 }

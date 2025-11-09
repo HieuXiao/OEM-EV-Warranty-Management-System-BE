@@ -1,6 +1,5 @@
 package com.mega.warrantymanagementsystem.controller.v2;
 
-import com.mega.warrantymanagementsystem.model.response.PartResponse;
 import com.mega.warrantymanagementsystem.service.v2.RepairPartService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +15,18 @@ public class RepairPartController {
     @Autowired
     private RepairPartService repairPartService;
 
-    // Khi claim chuyển sang REPAIR thì gọi hàm này
     @PostMapping("/process/{warrantyId}")
     public ResponseEntity<String> processRepairParts(@PathVariable String warrantyId) {
         repairPartService.handleRepairParts(warrantyId);
         return ResponseEntity.ok("Parts updated successfully for claim " + warrantyId);
     }
 
-    // API bổ sung Part quantity cho warehouse cụ thể
     @PatchMapping("/add-quantity")
-    public ResponseEntity<PartResponse> addQuantity(
+    public ResponseEntity<String> addQuantity(
             @RequestParam String partNumber,
             @RequestParam int quantity,
-            @RequestParam int warehouseId
-    ) {
-        return ResponseEntity.ok(repairPartService.addQuantity(partNumber, quantity, warehouseId));
+            @RequestParam int warehouseId) {
+        repairPartService.addQuantity(partNumber, quantity, warehouseId);
+        return ResponseEntity.ok("Quantity added successfully.");
     }
 }
