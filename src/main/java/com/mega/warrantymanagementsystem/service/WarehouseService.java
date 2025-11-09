@@ -1,22 +1,17 @@
 package com.mega.warrantymanagementsystem.service;
 
-import com.mega.warrantymanagementsystem.entity.Warehouse;
-import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
+import com.mega.warrantymanagementsystem.entity.*;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.WarehouseRequest;
-import com.mega.warrantymanagementsystem.model.response.WarehouseResponse;
-import com.mega.warrantymanagementsystem.repository.WarehouseRepository;
+import com.mega.warrantymanagementsystem.model.response.*;
+import com.mega.warrantymanagementsystem.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service xử lý logic cho Warehouse.
- * Bao gồm CRUD và tìm kiếm theo name, location (so sánh chính xác, không phân biệt hoa thường).
- */
 @Service
 public class WarehouseService {
 
@@ -24,82 +19,71 @@ public class WarehouseService {
     private WarehouseRepository warehouseRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private WarehousePartRepository warehousePartRepository;
 
-    public WarehouseResponse create(WarehouseRequest request) {
-        boolean exists = warehouseRepository.findAll().stream()
-                .anyMatch(w -> (w.getName() != null && w.getName().equalsIgnoreCase(request.getName()))
-                        || (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation())));
+    @Autowired
+    private ModelMapper mapper;
 
-        if (exists) {
-            throw new DuplicateResourceException("Warehouse name or location already exists");
-        }
-
-        Warehouse warehouse = modelMapper.map(request, Warehouse.class);
-        Warehouse saved = warehouseRepository.save(warehouse);
-        return modelMapper.map(saved, WarehouseResponse.class);
+    public WarehouseResponse create(WarehouseRequest req) {
+        Warehouse wh = mapper.map(req, Warehouse.class);
+        return mapper.map(warehouseRepository.save(wh), WarehouseResponse.class);
     }
 
-    public WarehouseResponse update(Integer id, WarehouseRequest request) {
-        Warehouse existing = warehouseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Warehouse không tồn tại với ID: " + id));
-
-        boolean exists = warehouseRepository.findAll().stream()
-                .anyMatch(w -> w.getWhId() != id &&
-                        ((w.getName() != null && w.getName().equalsIgnoreCase(request.getName())) ||
-                                (w.getLocation() != null && w.getLocation().equalsIgnoreCase(request.getLocation()))));
-
-        if (exists) {
-            throw new DuplicateResourceException("Warehouse name or location already exists");
-        }
-
-        existing.setName(request.getName());
-        existing.setLocation(request.getLocation());
-
-        Warehouse updated = warehouseRepository.save(existing);
-        return modelMapper.map(updated, WarehouseResponse.class);
+    public WarehouseResponse update(Integer id, WarehouseRequest req) {
+        Warehouse wh = warehouseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse ID: " + id));
+        wh.setName(req.getName());
+        wh.setLocation(req.getLocation());
+        return mapper.map(warehouseRepository.save(wh), WarehouseResponse.class);
     }
 
+    @Transactional
     public void delete(Integer id) {
-        if (!warehouseRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Warehouse does not exist: " + id);
-        }
-        warehouseRepository.deleteById(id);
+        Warehouse wh = warehouseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse ID: " + id));
+        List<WarehousePart> parts = warehousePartRepository.findByWarehouse_WhId(id);
+        warehousePartRepository.deleteAll(parts);
+        warehouseRepository.delete(wh);
     }
 
     public List<WarehouseResponse> getAll() {
         return warehouseRepository.findAll().stream()
-                .map(w -> modelMapper.map(w, WarehouseResponse.class))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     public WarehouseResponse getById(Integer id) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Warehouse không tồn tại với ID: " + id));
-        return modelMapper.map(warehouse, WarehouseResponse.class);
+        Warehouse wh = warehouseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse ID: " + id));
+        return toResponse(wh);
     }
 
-    /**
-     * Tìm kiếm theo tên kho (so sánh chính xác, không phân biệt hoa thường).
-     */
     public List<WarehouseResponse> getByName(String name) {
-        String normalized = name.trim().toLowerCase();
         return warehouseRepository.findAll().stream()
-                .filter(w -> w.getName() != null &&
-                        w.getName().trim().toLowerCase().equals(normalized))
-                .map(w -> modelMapper.map(w, WarehouseResponse.class))
-                .collect(Collectors.toList());
+                .filter(w -> w.getName().toLowerCase().contains(name.toLowerCase()))
+                .map(this::toResponse)
+                .toList();
     }
 
-    /**
-     * Tìm kiếm theo vị trí kho (so sánh chính xác, không phân biệt hoa thường).
-     */
     public List<WarehouseResponse> getByLocation(String location) {
-        String normalized = location.trim().toLowerCase();
         return warehouseRepository.findAll().stream()
-                .filter(w -> w.getLocation() != null &&
-                        w.getLocation().trim().toLowerCase().equals(normalized))
-                .map(w -> modelMapper.map(w, WarehouseResponse.class))
-                .collect(Collectors.toList());
+                .filter(w -> w.getLocation().toLowerCase().contains(location.toLowerCase()))
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private WarehouseResponse toResponse(Warehouse wh) {
+        WarehouseResponse res = mapper.map(wh, WarehouseResponse.class);
+        List<WarehousePart> wps = warehousePartRepository.findByWarehouse_WhId(wh.getWhId());
+        List<PartInWarehouseDto> parts = wps.stream().map(wp -> {
+            PartInWarehouseDto dto = new PartInWarehouseDto();
+            dto.setPartNumber(wp.getPart().getPartNumber());
+            dto.setNamePart(wp.getPart().getNamePart());
+            dto.setQuantity(wp.getQuantity());
+            dto.setPrice(wp.getPrice());
+            return dto;
+        }).collect(Collectors.toList());
+        res.setParts(parts);
+        return res;
     }
 }

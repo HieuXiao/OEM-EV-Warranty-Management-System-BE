@@ -1,13 +1,17 @@
 package com.mega.warrantymanagementsystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Warehouse entity. It will have a list of WarehousePart entries (parts + quantities).
+ * lowPart is kept as an ElementCollection of partNumbers to match your existing model.
+ */
 @Entity
 @Table(name = "warehouse")
 @Data
@@ -17,26 +21,28 @@ public class Warehouse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "whId")
-    private int whId;
+    @Column(name = "wh_id")
+    private Integer whId;
 
-    @Column(name = "name", length = 100, nullable = false)
-    @NotEmpty(message = "Name cannot be empty")
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "location", length = 100, nullable = false)
-    @NotEmpty(message = "Location cannot be empty")
+    /**
+     * location should follow a consistent format (e.g. "Country,City,Province,District")
+     * so the location priority matching in handleRepairParts can work reliably.
+     */
+    @Column(nullable = false)
     private String location;
 
-    // Lưu danh sách low_part (các part số lượng thấp)
+    /**
+     * lowPart: list of partNumbers that are considered "low" in this warehouse.
+     * We keep it as ElementCollection to match your existing response model.
+     */
     @ElementCollection
-    @CollectionTable(name = "warehouse_low_part", joinColumns = @JoinColumn(name = "whId"))
-    @Column(name = "part_name")
-    private List<String> lowPart;
+    @CollectionTable(name = "warehouse_low_part", joinColumns = @JoinColumn(name = "wh_id"))
+    @Column(name = "part_number")
+    private List<String> lowPart = new ArrayList<>();
 
-    // Thêm quan hệ ngược
-    @OneToMany(mappedBy = "warehouse")
-    @JsonIgnore
-    private List<Part> parts;
-
+    @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WarehousePart> parts = new ArrayList<>();
 }
