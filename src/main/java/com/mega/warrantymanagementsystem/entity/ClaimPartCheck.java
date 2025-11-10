@@ -17,8 +17,12 @@ import java.util.List;
 public class ClaimPartCheck {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "part_number", length = 50)
-    private String partNumber; // PK
+    private String partNumber;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warranty_id", nullable = false)
