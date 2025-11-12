@@ -31,4 +31,7 @@ public class WarrantyClaimResponse {
 
     // ID các campaign gắn với claim (nếu có)
     private List<Integer> campaignIds;
+
+    private List<String> timeline;
+
 }
