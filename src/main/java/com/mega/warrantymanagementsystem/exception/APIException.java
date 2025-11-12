@@ -68,5 +68,9 @@ public class APIException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    @ExceptionHandler(DisabledPartException.class)
+    public ResponseEntity<String> handleDisabledPartException(DisabledPartException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
 
 }

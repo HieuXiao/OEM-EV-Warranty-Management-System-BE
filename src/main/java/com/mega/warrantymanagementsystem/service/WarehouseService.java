@@ -22,6 +22,9 @@ public class WarehouseService {
     private WarehousePartRepository warehousePartRepository;
 
     @Autowired
+    private PartUnderWarrantyRepository partUnderWarrantyRepository;
+
+    @Autowired
     private ModelMapper mapper;
 
     public WarehouseResponse create(WarehouseRequest req) {
@@ -75,14 +78,23 @@ public class WarehouseService {
     private WarehouseResponse toResponse(Warehouse wh) {
         WarehouseResponse res = mapper.map(wh, WarehouseResponse.class);
         List<WarehousePart> wps = warehousePartRepository.findByWarehouse_WhId(wh.getWhId());
-        List<PartInWarehouseDto> parts = wps.stream().map(wp -> {
-            PartInWarehouseDto dto = new PartInWarehouseDto();
-            dto.setPartNumber(wp.getPart().getPartNumber());
-            dto.setNamePart(wp.getPart().getNamePart());
-            dto.setQuantity(wp.getQuantity());
-            dto.setPrice(wp.getPrice());
-            return dto;
-        }).collect(Collectors.toList());
+        List<PartInWarehouseDto> parts = wps.stream()
+                .filter(wp -> {
+                    Part part = wp.getPart();
+                    if (part == null) return false;
+                    PartUnderWarranty puw = partUnderWarrantyRepository.findById(part.getPartNumber()).orElse(null);
+                    return puw != null && Boolean.TRUE.equals(puw.getIsEnable());
+                })
+                .map(wp -> {
+                    PartInWarehouseDto dto = new PartInWarehouseDto();
+                    dto.setPartNumber(wp.getPart().getPartNumber());
+                    dto.setNamePart(wp.getPart().getNamePart());
+                    dto.setQuantity(wp.getQuantity());
+                    dto.setPrice(wp.getPrice());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
         res.setParts(parts);
         return res;
     }

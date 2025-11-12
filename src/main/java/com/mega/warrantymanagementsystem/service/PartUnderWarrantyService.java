@@ -27,6 +27,9 @@ public class PartUnderWarrantyService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PartService partService;
+
     // CREATE
     public PartUnderWarrantyResponse createPart(PartUnderWarrantyRequest request) {
         // kiểm tra trùng id
@@ -63,12 +66,25 @@ public class PartUnderWarrantyService {
         PartUnderWarranty part = partRepo.findById(partId)
                 .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
 
+        Boolean oldStatus = part.getIsEnable();
+
         part.setPartName(request.getPartName());
         part.setPartBrand(request.getPartBrand());
         part.setPrice(request.getPrice());
         part.setVehicleModel(request.getVehicleModel());
         part.setDescription(request.getDescription());
         part.setIsEnable(request.getIsEnable());
+
+        PartUnderWarranty saved = partRepo.save(part);
+
+        // Nếu trạng thái thay đổi
+        if (oldStatus != null && !oldStatus.equals(request.getIsEnable())) {
+            if (Boolean.FALSE.equals(request.getIsEnable())) {
+                partService.disablePart(partId); // Ẩn tất cả part liên quan
+            } else if (Boolean.TRUE.equals(request.getIsEnable())) {
+                partService.enablePart(partId); // Hiện lại
+            }
+        }
 
         if (request.getAdminId() != null) {
             Account admin = accountRepo.findById(request.getAdminId().toUpperCase())
@@ -84,6 +100,27 @@ public class PartUnderWarrantyService {
         PartUnderWarranty part = partRepo.findById(partId)
                 .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
         partRepo.delete(part);
+    }
+
+    // UPDATE ENABLE STATUS ONLY
+    public PartUnderWarrantyResponse updateEnableStatus(String partId, Boolean isEnable) {
+        PartUnderWarranty part = partRepo.findById(partId)
+                .orElseThrow(() -> new ResourceNotFoundException("Part not found: " + partId));
+
+        Boolean oldStatus = part.getIsEnable();
+        part.setIsEnable(isEnable);
+        PartUnderWarranty saved = partRepo.save(part);
+
+        // Nếu trạng thái thay đổi thì ẩn hoặc hiện lại các part liên quan
+        if (oldStatus != null && !oldStatus.equals(isEnable)) {
+            if (Boolean.FALSE.equals(isEnable)) {
+                partService.disablePart(partId);
+            } else if (Boolean.TRUE.equals(isEnable)) {
+                partService.enablePart(partId);
+            }
+        }
+
+        return mapToResponse(saved);
     }
 
     // mapping entity -> response

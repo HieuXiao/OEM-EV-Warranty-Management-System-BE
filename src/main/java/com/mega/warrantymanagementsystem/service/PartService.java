@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.*;
+import com.mega.warrantymanagementsystem.exception.exception.DisabledPartException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
 import com.mega.warrantymanagementsystem.model.request.PartRequest;
 import com.mega.warrantymanagementsystem.model.response.*;
@@ -26,12 +27,22 @@ public class PartService {
     private WarehousePartRepository warehousePartRepository;
 
     @Autowired
+    private PartUnderWarrantyRepository partUnderWarrantyRepository;
+
+    @Autowired
     private ModelMapper mapper;
 
     private static final int LOW_THRESHOLD = 50;
 
     @Transactional
     public PartResponse createPart(PartRequest request) {
+        PartUnderWarranty partUW = partUnderWarrantyRepository.findById(request.getPartNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy PartUnderWarranty với ID: " + request.getPartNumber()));
+
+        if (Boolean.FALSE.equals(partUW.getIsEnable())) {
+            throw new DisabledPartException("PartUnderWarranty này đang bị vô hiệu hóa, không thể tạo Part.");
+        }
+
         Warehouse warehouse = warehouseRepository.findById(request.getWhId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy warehouse với ID: " + request.getWhId()));
 
@@ -68,6 +79,10 @@ public class PartService {
 
     public List<PartResponse> getAllParts() {
         return partRepository.findAll().stream()
+                .filter(p -> {
+                    PartUnderWarranty puw = partUnderWarrantyRepository.findById(p.getPartNumber()).orElse(null);
+                    return puw != null && Boolean.TRUE.equals(puw.getIsEnable());
+                })
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -75,11 +90,26 @@ public class PartService {
     public PartResponse getPartBySerial(String serial) {
         Part part = partRepository.findById(serial)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part: " + serial));
+
+        PartUnderWarranty partUW = partUnderWarrantyRepository.findById(serial)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy PartUnderWarranty: " + serial));
+
+        if (Boolean.FALSE.equals(partUW.getIsEnable())) {
+            throw new IllegalStateException("PartUnderWarranty này đang bị vô hiệu hóa, không thể truy cập.");
+        }
         return toResponse(part);
     }
 
     @Transactional
     public PartResponse updatePart(String serial, PartRequest request) {
+
+        PartUnderWarranty puw = partUnderWarrantyRepository.findById(serial)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy PartUnderWarranty: " + serial));
+
+        if (Boolean.FALSE.equals(puw.getIsEnable())) {
+            throw new DisabledPartException("PartUnderWarranty này đã bị vô hiệu hóa, không thể cập nhật hoặc xóa.");
+        }
+
         Part part = partRepository.findById(serial)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy part: " + serial));
 
@@ -111,6 +141,14 @@ public class PartService {
 
     @Transactional
     public void deletePart(String serial) {
+
+        PartUnderWarranty puw = partUnderWarrantyRepository.findById(serial)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy PartUnderWarranty: " + serial));
+
+        if (Boolean.FALSE.equals(puw.getIsEnable())) {
+            throw new IllegalStateException("PartUnderWarranty này đã bị vô hiệu hóa, không thể cập nhật hoặc xóa.");
+        }
+
         List<WarehousePart> list = warehousePartRepository.findByPart_PartNumber(serial);
         warehousePartRepository.deleteAll(list);
         partRepository.deleteById(serial);
@@ -157,4 +195,30 @@ public class PartService {
         warehouse.setLowPart(lowParts);
         warehouseRepository.save(warehouse);
     }
+
+    // Ẩn tất cả part trong warehouse và lowPart khi part bị vô hiệu hóa
+    @Transactional
+    public void disablePart(String partNumber) {
+        List<WarehousePart> list = warehousePartRepository.findByPart_PartNumber(partNumber);
+        for (WarehousePart wp : list) {
+            Warehouse wh = wp.getWarehouse();
+            // Xóa khỏi danh sách lowPart (nếu có)
+            List<String> lowParts = new ArrayList<>(Optional.ofNullable(wh.getLowPart()).orElse(new ArrayList<>()));
+            lowParts.remove(partNumber);
+            wh.setLowPart(lowParts);
+            warehouseRepository.save(wh);
+        }
+    }
+
+    // Hiện lại (khi isEnable bật lại)
+    @Transactional
+    public void enablePart(String partNumber) {
+        // chỉ cần đảm bảo lowPart được cập nhật đúng theo quantity
+        List<WarehousePart> list = warehousePartRepository.findByPart_PartNumber(partNumber);
+        for (WarehousePart wp : list) {
+            updateLowPartStatus(wp.getWarehouse(), wp);
+        }
+    }
+
+
 }

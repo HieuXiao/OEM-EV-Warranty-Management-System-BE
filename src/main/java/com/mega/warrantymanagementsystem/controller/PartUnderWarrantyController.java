@@ -38,6 +38,13 @@ public class PartUnderWarrantyController {
         return partService.updatePart(id, request);
     }
 
+    @PatchMapping("/{id}/enable")
+    public PartUnderWarrantyResponse updateEnableStatus(
+            @PathVariable String id,
+            @RequestParam Boolean isEnable) {
+        return partService.updateEnableStatus(id, isEnable);
+    }
+
     @DeleteMapping("/{serial}")
     public void deletePart(@PathVariable String serial) {
         partService.deletePart(serial);
