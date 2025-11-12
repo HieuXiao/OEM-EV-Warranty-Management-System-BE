@@ -98,4 +98,7 @@ public class WarrantyClaim {
         }
     }
 
+    @OneToMany(mappedBy = "warrantyClaim", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WarrantyClaimProgress> progressHistory = new ArrayList<>();
+
 }
