@@ -33,6 +33,9 @@ public class RepairPartService {
     private WarrantyClaimRepository warrantyClaimRepository;
 
     @Autowired
+    private PartUnderWarrantyRepository partUnderWarrantyRepository;
+
+    @Autowired
     private PartService partService;
 
     @Autowired
@@ -64,6 +67,12 @@ public class RepairPartService {
             List<WarehousePart> candidates = warehousePartRepository.findByPart_PartNumber(partNumber)
                     .stream()
                     .filter(wp -> wp.getQuantity() > 0)
+                    .filter(wp -> {
+                        Part part = wp.getPart();
+                        if (part == null) return false;
+                        PartUnderWarranty puw = partUnderWarrantyRepository.findById(part.getPartNumber()).orElse(null);
+                        return puw != null && Boolean.TRUE.equals(puw.getIsEnable());
+                    })
                     .collect(Collectors.toList());
 
             if (candidates.isEmpty()) continue;
