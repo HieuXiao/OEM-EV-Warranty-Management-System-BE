@@ -3,6 +3,8 @@ package com.mega.warrantymanagementsystem.repository;
 import com.mega.warrantymanagementsystem.entity.WarrantyClaim;
 import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -26,5 +28,29 @@ public interface WarrantyClaimRepository extends JpaRepository<WarrantyClaim, St
 
     // Tìm theo VIN (Vehicle)
     List<WarrantyClaim> findByVehicle_Vin(String vin);
+
+    @Query(value = """
+        SELECT MONTH(claim_date) AS month, COUNT(*) AS total
+        FROM warranty_claim
+        WHERE YEAR(claim_date) = :year
+        GROUP BY MONTH(claim_date)
+        ORDER BY month
+        """, nativeQuery = true)
+    List<Object[]> countClaimsByMonth(@Param("year") int year);
+
+
+    @Query(value = """
+        SELECT claim_date AS date, COUNT(*) AS total
+        FROM warranty_claim
+        WHERE YEAR(claim_date) = :year
+          AND MONTH(claim_date) = :month
+        GROUP BY claim_date
+        ORDER BY claim_date
+        """, nativeQuery = true)
+    List<Object[]> countClaimsByDay(
+            @Param("year") int year,
+            @Param("month") int month
+    );
+
 
 }
