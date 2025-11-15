@@ -22,4 +22,6 @@ public interface ClaimPartCheckRepository extends JpaRepository<ClaimPartCheck, 
 
     ClaimPartCheck findByPartNumberAndWarrantyClaim_ClaimId(String partNumber, String claimId);
 
+    void deleteByWarrantyClaim_ClaimId(String claimId);
+
 }

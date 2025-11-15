@@ -1,6 +1,7 @@
 package com.mega.warrantymanagementsystem.service;
 
 import com.mega.warrantymanagementsystem.entity.*;
+import com.mega.warrantymanagementsystem.entity.entity.WarrantyClaimStatus;
 import com.mega.warrantymanagementsystem.exception.exception.BusinessLogicException;
 import com.mega.warrantymanagementsystem.exception.exception.DuplicateResourceException;
 import com.mega.warrantymanagementsystem.exception.exception.ResourceNotFoundException;
@@ -192,4 +193,18 @@ public class ClaimPartCheckService {
 
         return res;
     }
+    //====================DELETE CLAIM PART CHECK BY WARRANTY CLAIM=====================
+    @Transactional
+    public void deleteAllByClaim(String claimId) {
+
+        WarrantyClaim claim = warrantyClaimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy WarrantyClaim: " + claimId));
+
+        if (claim.getStatus() != WarrantyClaimStatus.CHECK) {
+            throw new BusinessLogicException("Chỉ được xóa ClaimPartCheck khi claim đang ở trạng thái CHECK.");
+        }
+
+        claimPartCheckRepository.deleteByWarrantyClaim_ClaimId(claimId);
+    }
+
 }
