@@ -78,4 +78,11 @@ public class ClaimPartCheckController {
     public ResponseEntity<List<ClaimPartCheckResponse>> searchByWarrantyId(@PathVariable String warrantyId) {
         return ResponseEntity.ok(claimPartCheckService.getByWarrantyId(warrantyId));
     }
+
+    // DELETE ALL CLAIM PART CHECK BY WARRNTY ID
+    @DeleteMapping("/delete-all/{claimId}")
+    public ResponseEntity<String> deleteAll(@PathVariable String claimId) {
+        claimPartCheckService.deleteAllByClaim(claimId);
+        return ResponseEntity.ok("Đã xóa toàn bộ ClaimPartCheck thuộc claim " + claimId);
+    }
 }
